@@ -10,6 +10,55 @@ body {
     color: #e0e0e0;
     line-height: 1.6;
     overflow-x: hidden;
+    position: relative;
+}
+
+/* Neural-ish background canvas */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Top tabs */
+.top-tabs {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    display: flex;
+    gap: 10px;
+}
+
+.top-tabs .tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    background: rgba(26, 26, 26, 0.85);
+    color: #e0e0e0;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid #2a2a2a;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+}
+
+.top-tabs .tab:hover {
+    border-color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.08);
+}
+
+.top-tabs .tab.active {
+    background: rgba(42, 42, 42, 0.92);
+    border-color: #ffffff;
+    color: #ffffff;
 }
 
 .container {
@@ -102,13 +151,6 @@ body {
     animation: fadeInUp 0.6s ease-out both;
 }
 
-.section:nth-child(1) { animation-delay: 0.3s; }
-.section:nth-child(2) { animation-delay: 0.4s; }
-.section:nth-child(3) { animation-delay: 0.5s; }
-.section:nth-child(4) { animation-delay: 0.6s; }
-.section:nth-child(5) { animation-delay: 0.7s; }
-.section:nth-child(6) { animation-delay: 0.8s; }
-
 .section-title {
     font-size: 1.8rem;
     font-weight: 300;
@@ -199,11 +241,6 @@ body {
 
 .affiliation-item.with-link {
     cursor: pointer;
-}
-
-.affiliation-org {
-    font-size: 1.1rem;
-    color: #ffffff;
 }
 
 .affiliation-sub {
@@ -327,6 +364,7 @@ body {
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
+    transform-style: preserve-3d;
 }
 
 .timeline-item:hover {
@@ -418,14 +456,121 @@ body {
     margin-top: 8px;
 }
 
-/* Works */
-.coming-soon {
+/* Filter System */
+.filter-container {
+    margin-bottom: 32px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: #1a1a1a;
+    color: #888888;
+    border: 1px solid #2a2a2a;
+    padding: 10px 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.filter-btn:hover {
+    color: #ffffff;
+    border-color: #444444;
+}
+
+.filter-btn.active {
+    background: #2a2a2a;
+    color: #ffffff;
+    border-color: #ffffff;
+}
+
+/* GitHub Section */
+.github-section {
+    margin-bottom: 80px;
+}
+
+.github-activity {
+    min-height: 200px;
+}
+
+.github-activity img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.loading {
     text-align: center;
-    padding: 60px 20px;
-    font-size: 1.3rem;
-    color: #666666;
-    font-style: italic;
-    font-weight: 300;
+    color: #888888;
+    padding: 40px;
+}
+
+.error {
+    color: #ff6b6b;
+}
+
+/* Works / Vlog Articles */
+.article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.article-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+}
+
+.article-card:hover {
+    border-color: #ffffff;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
+}
+
+.article-title {
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.article-date {
+    color: #888888;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+}
+
+.article-content {
+    color: #888888;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 14px;
+}
+
+.article-link-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.article-link {
+    color: #888888;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.article-link:hover {
+    color: #ffffff;
 }
 
 /* Footer */
@@ -484,11 +629,9 @@ body {
         font-size: 1.5rem;
     }
 
-    .interest-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .research-grid {
+    .interest-grid,
+    .research-grid,
+    .article-grid {
         grid-template-columns: 1fr;
     }
 
@@ -499,6 +642,14 @@ body {
 
     .timeline-date {
         font-size: 0.85rem;
+    }
+
+    .top-tabs {
+        top: 10px;
+        left: 10px;
+        gap: 8px;
+        flex-wrap: wrap;
+        max-width: calc(100vw - 20px);
     }
 }
 
@@ -516,11 +667,12 @@ body {
         padding: 24px;
     }
 
-    .interest-item {
+    .interest-item,
+    .research-card {
         padding: 20px;
     }
 
-    .research-card {
+    .article-card {
         padding: 20px;
     }
 }

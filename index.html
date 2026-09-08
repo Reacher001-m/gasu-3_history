@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ga-su3 - Portfolio</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
-<body>
+<body data-page="index" data-github-user="Reacher001-m">
+    <nav class="top-tabs" aria-label="ページナビゲーション">
+        <a class="tab" href="index.html" data-tab="index">Profile</a>
+        <a class="tab" href="works.html" data-tab="works">Works</a>
+        <a class="tab" href="vlog.html" data-tab="vlog">Vlog</a>
+    </nav>
+
     <div class="container">
         <header class="header">
             <div class="profile-header">
@@ -262,9 +269,11 @@
                 </div>
             </section>
 
-            <section class="section works">
-                <h2 class="section-title">Works</h2>
-                <p class="coming-soon">Coming soon...</p>
+            <section class="section github-section">
+                <h2 class="section-title">GitHub Activity</h2>
+                <div class="github-activity" aria-label="過去1年のcontributionsカレンダー">
+                    <div class="loading">読み込み中...</div>
+                </div>
             </section>
         </main>
 
