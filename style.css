@@ -573,6 +573,147 @@ body {
     color: #ffffff;
 }
 
+/* BGM Consent Modal */
+.bgm-consent {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.65);
+    padding: 18px;
+}
+
+.bgm-consent-card {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(26, 26, 26, 0.96);
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 20px 18px;
+    box-shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
+    text-align: center;
+    color: #e0e0e0;
+}
+
+.bgm-consent-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.bgm-consent-text {
+    color: #bdbdbd;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    margin-bottom: 14px;
+}
+
+.bgm-consent-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
+.bgm-consent-ok,
+.bgm-consent-no {
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.25s ease;
+    border: 1px solid #ffffff;
+}
+
+.bgm-consent-ok {
+    background: #2a2a2a;
+    color: #ffffff;
+}
+
+.bgm-consent-ok:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.06);
+}
+
+.bgm-consent-no {
+    background: transparent;
+    color: #cfcfcf;
+    border-color: #666666;
+}
+
+.bgm-consent-no:hover {
+    transform: translateY(-2px);
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+/* BGM Controls */
+.bgm-controls {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 30;
+    display: block;
+    min-width: 260px;
+    background: rgba(26, 26, 26, 0.86);
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 12px 50px rgba(0, 0, 0, 0.35);
+}
+
+.bgm-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bgm-volume-label {
+    color: #bdbdbd;
+    font-size: 0.95rem;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+.bgm-volume {
+    flex: 1;
+}
+
+.bgm-toggle {
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    transition: all 0.25s ease;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.bgm-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 480px) {
+    .bgm-controls {
+        right: 12px;
+        bottom: 12px;
+        min-width: unset;
+        width: calc(100vw - 24px);
+    }
+
+    .bgm-controls-row {
+        gap: 8px;
+    }
+}
+
 /* Footer */
 .footer {
     margin-top: 100px;

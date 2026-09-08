@@ -492,4 +492,142 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         vlog.init();
     }
+
+    // 7) BGM consent + play (user gesture)
+    const consentEl = document.getElementById('bgm-consent');
+    const okBtn = document.getElementById('bgm-consent-ok');
+    const noBtn = document.getElementById('bgm-consent-no');
+    const bgm = document.getElementById('bgm') as HTMLAudioElement | null;
+
+    const consentKey = 'bgm-consent'; // "yes" / "no"
+    const volumeKey = 'bgm-volume';
+
+    const hideConsent = () => {
+        if (consentEl) consentEl.style.display = 'none';
+    };
+
+    const applyVolume = () => {
+        if (!bgm) return;
+        const v = Number(localStorage.getItem(volumeKey) ?? '1');
+        const volume = Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 1;
+        try {
+            bgm.volume = volume;
+        } catch (_) {
+            // ignore
+        }
+        return volume;
+    };
+
+    const startBgm = () => {
+        if (!bgm) return;
+        applyVolume();
+
+        const p = bgm.play();
+        if (p && typeof (p as Promise<void>).catch === 'function') {
+            (p as Promise<void>).catch(() => {
+                // Autoplay may still be blocked; user can try again with controls.
+            });
+        }
+    };
+
+    const pauseBgm = () => {
+        if (!bgm) return;
+        try {
+            bgm.pause();
+        } catch (_) {
+            // ignore
+        }
+    };
+
+    const volRange = document.getElementById('bgm-volume') as HTMLInputElement | null;
+    const toggleBtn = document.getElementById('bgm-toggle') as HTMLButtonElement | null;
+
+    const syncToggleText = () => {
+        if (!toggleBtn || !bgm) return;
+        toggleBtn.textContent = bgm.paused ? '再生' : '一時停止';
+    };
+
+    if (volRange) {
+        const v = Number(localStorage.getItem(volumeKey) ?? '1');
+        const volume = Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : 1;
+        volRange.value = String(Math.round(volume * 100));
+
+        volRange.addEventListener('input', () => {
+            if (!bgm) return;
+            const next = Number(volRange.value) / 100;
+            try {
+                localStorage.setItem(volumeKey, String(next));
+            } catch (_) {
+                // ignore
+            }
+
+            bgm.volume = next;
+            syncToggleText();
+        });
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            if (!bgm) return;
+            applyVolume();
+
+            if (bgm.paused) {
+                // Treat a user click as renewed consent.
+                const consent = localStorage.getItem(consentKey);
+                if (consent !== 'yes') {
+                    try {
+                        localStorage.setItem(consentKey, 'yes');
+                    } catch (_) {
+                        // ignore
+                    }
+                    hideConsent();
+                }
+
+                startBgm();
+            } else {
+                pauseBgm();
+            }
+
+            syncToggleText();
+        });
+    }
+
+    const consent = localStorage.getItem(consentKey);
+    if (consent === 'yes') {
+        hideConsent();
+        startBgm();
+        syncToggleText();
+    } else if (consent === 'no') {
+        hideConsent();
+        pauseBgm();
+        syncToggleText();
+    } else {
+        syncToggleText();
+
+        if (okBtn) {
+            okBtn.addEventListener('click', () => {
+                try {
+                    localStorage.setItem(consentKey, 'yes');
+                } catch (_) {
+                    // ignore
+                }
+                hideConsent();
+                startBgm();
+                syncToggleText();
+            }, { once: true });
+        }
+
+        if (noBtn) {
+            noBtn.addEventListener('click', () => {
+                try {
+                    localStorage.setItem(consentKey, 'no');
+                } catch (_) {
+                    // ignore
+                }
+                hideConsent();
+                pauseBgm();
+                syncToggleText();
+            }, { once: true });
+        }
+    }
 });

@@ -14,7 +14,28 @@
         <a class="tab" href="vlog.html" data-tab="vlog">Vlog</a>
     </nav>
 
-    <div class="container">
+    <!-- BGM consent modal -->
+    <div id="bgm-consent" class="bgm-consent" role="dialog" aria-modal="true" aria-label="BGM再生許可">
+        <div class="bgm-consent-card">
+            <h2 class="bgm-consent-title">音が鳴ります</h2>
+            <p class="bgm-consent-text">このサイトではBGMが流れます。[OK][NO]で選んでください。</p>
+            <div class="bgm-consent-actions">
+                <button id="bgm-consent-ok" class="bgm-consent-ok" type="button">OK</button>
+                <button id="bgm-consent-no" class="bgm-consent-no" type="button">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BGM controls (volume + toggle) -->
+    <div class="bgm-controls" aria-label="BGMコントロール">
+        <div class="bgm-controls-row">
+            <label class="bgm-volume-label" for="bgm-volume">音量</label>
+            <input id="bgm-volume" class="bgm-volume" type="range" min="0" max="100" step="1" value="100" />
+            <button id="bgm-toggle" class="bgm-toggle" type="button">再生</button>
+        </div>
+    </div>
+
+    <div class="container" style="padding-bottom: 120px;">
         <header class="header">
             <div class="profile-header">
                 <img src="kopa.jpg" alt="ga-su3" class="profile-icon">
@@ -58,5 +79,7 @@
             <p>&copy; 2026 ga-su3. All rights reserved.</p>
         </footer>
     </div>
+
+    <audio id="bgm" src="bgm.mp3" loop preload="auto" playsinline></audio>
 </body>
 </html>
