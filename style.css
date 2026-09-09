@@ -682,15 +682,48 @@ body {
 
 .bgm-volume {
     flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(120, 220, 255, 0.55) 0%, rgba(120, 220, 255, 0.12) 100%);
+    border: 1px solid rgba(120, 220, 255, 0.35);
+    outline: none;
+}
+
+.bgm-volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #78dcff;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 4px rgba(120, 220, 255, 0.12);
+    cursor: pointer;
+}
+
+.bgm-volume::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #78dcff;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 4px rgba(120, 220, 255, 0.12);
+    cursor: pointer;
+}
+
+.bgm-volume:focus {
+    box-shadow: 0 0 0 3px rgba(120, 220, 255, 0.18);
 }
 
 .bgm-toggle {
     padding: 8px 12px;
     border-radius: 10px;
     cursor: pointer;
-    background: #2a2a2a;
-    color: #ffffff;
-    border: 1px solid #ffffff;
+    background: rgba(120, 220, 255, 0.10);
+    color: #eaffff;
+    border: 1px solid rgba(120, 220, 255, 0.65);
     transition: all 0.25s ease;
     font-size: 0.95rem;
     white-space: nowrap;
@@ -698,7 +731,8 @@ body {
 
 .bgm-toggle:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.06);
+    background: rgba(120, 220, 255, 0.16);
+    box-shadow: 0 10px 30px rgba(120, 220, 255, 0.10);
 }
 
 @media (max-width: 480px) {

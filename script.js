@@ -93,14 +93,27 @@ class NeuralNetworkBackground {
                 if (dist2 > r2) continue;
 
                 const dist = Math.sqrt(dist2) || 0.0001;
-                const w = 1 - dist / r;
+
+                // Link strength: inner -> strong, outer -> fade out
+                const rOuter = r;
+                const rInner = rOuter * 0.55;
+
+                // link: 1 when dist <= rInner, 0 when dist >= rOuter
+                const linkRaw = (rOuter - dist) / (rOuter - rInner);
+                const link = Math.max(0, Math.min(1, linkRaw));
+                const eased = link * link; // sharper “connect threshold”
 
                 const pulse = 0.65 + 0.35 * Math.sin(this.time * 1.2 + a.phase + b.phase);
-                const alpha = 0.02 + 0.18 * w * pulse;
-                const lineWidth = 0.3 + 1.4 * w * pulse;
+
+                // Closer -> darker/thicker; farther -> lighter/thinner (eventually disappears)
+                const alpha = 0.005 + 0.26 * eased * pulse;
+                const lineWidth = 0.15 + 1.95 * eased * pulse;
 
                 // Neural-ish wiring color
-                ctx.strokeStyle = `rgba(120, 220, 255, ${alpha})`;
+                const rCol = 120;
+                const gCol = 220;
+                const bCol = 255;
+                ctx.strokeStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${alpha})`;
                 ctx.lineWidth = lineWidth;
 
                 ctx.beginPath();
@@ -111,7 +124,7 @@ class NeuralNetworkBackground {
                 // Spring-like forces (so it looks alive)
                 const nx = dx / dist;
                 const ny = dy / dist;
-                const force = this.strength * w * (0.7 + 0.3 * pulse);
+                const force = this.strength * eased * (0.7 + 0.3 * pulse);
 
                 a.vx += nx * force;
                 a.vy += ny * force;
@@ -196,8 +209,8 @@ class Card3DEffect {
         const y = e.clientY - rect.top;
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        const rotateX = (y - centerY) / 10;
-        const rotateY = (centerX - x) / 10;
+        const rotateX = (y - centerY) / 12;
+        const rotateY = (centerX - x) / 12;
         card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
     }
 
@@ -462,6 +475,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const consentKey = 'bgm-consent'; // "yes" / "no"
     const volumeKey = 'bgm-volume';
 
+    // Page navigation resume state (tab-scoped)
+    const playingKey = 'bgm-playing';
+    const lastTimeKey = 'bgm-last-time';
+
+    const getSession = (key) => {
+        try {
+            return sessionStorage.getItem(key);
+        } catch (_) {
+            return null;
+        }
+    };
+
+    const setSession = (key, value) => {
+        try {
+            sessionStorage.setItem(key, value);
+        } catch (_) {
+            // ignore
+        }
+    };
+
+    const saveBgmProgress = () => {
+        if (!bgm) return;
+        const t = Number.isFinite(bgm.currentTime) ? Math.max(0, bgm.currentTime) : 0;
+        setSession(lastTimeKey, String(t));
+    };
+
+    const setBgmPlaying = (playing) => {
+        setSession(playingKey, playing ? 'true' : 'false');
+    };
+
+    const restoreBgmIfWasPlaying = () => {
+        if (!bgm) return;
+
+        const tRaw = getSession(lastTimeKey);
+        const t = tRaw ? Number(tRaw) : 0;
+
+        applyVolume();
+
+        const seekAndPlay = () => {
+            try {
+                if (Number.isFinite(t) && t >= 0) bgm.currentTime = t;
+            } catch (_) {
+                // ignore
+            }
+
+            const p = bgm.play();
+            if (p && typeof p.then === 'function') {
+                p.then(() => {
+                    setBgmPlaying(true);
+                }).catch(() => {
+                    setBgmPlaying(false);
+                });
+            } else {
+                setBgmPlaying(true);
+            }
+        };
+
+        if (bgm.readyState >= 1) {
+            seekAndPlay();
+        } else {
+            bgm.addEventListener('loadedmetadata', () => seekAndPlay(), { once: true });
+        }
+    };
+
+    // Save BGM progress when leaving the page.
+    window.addEventListener('pagehide', () => {
+        if (!bgm) return;
+        setBgmPlaying(!bgm.paused);
+        saveBgmProgress();
+    });
+
     const hideConsent = () => {
         if (consentEl) consentEl.style.display = 'none';
     };
@@ -481,10 +565,15 @@ document.addEventListener('DOMContentLoaded', () => {
         applyVolume();
 
         const p = bgm.play();
-        if (p && typeof p.catch === 'function') {
-            p.catch(() => {
+        if (p && typeof p.then === 'function') {
+            p.then(() => {
+                setBgmPlaying(true);
+            }).catch(() => {
+                setBgmPlaying(false);
                 // Some browsers may still block; user can retry with the control.
             });
+        } else {
+            setBgmPlaying(true);
         }
     };
 
@@ -493,7 +582,23 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             bgm.pause();
         } catch (_) { /* ignore */ }
+
+        setBgmPlaying(false);
+        saveBgmProgress();
     };
+
+    // Periodically save currentTime while playing (helps resume accurately across page navigation).
+    let bgmSaveTimer = null;
+    const startBgmSaveTimer = () => {
+        if (!bgm) return;
+        if (bgmSaveTimer) return;
+
+        bgmSaveTimer = window.setInterval(() => {
+            if (!bgm) return;
+            if (!bgm.paused) saveBgmProgress();
+        }, 1000);
+    };
+    startBgmSaveTimer();
 
     // Controls (added in each HTML page)
     const volRange = document.getElementById('bgm-volume');
@@ -525,9 +630,14 @@ document.addEventListener('DOMContentLoaded', () => {
             applyVolume();
 
             if (bgm.paused) {
-                // If user explicitly clicks play, treat it as renewed consent.
+                // User pressed play.
+                // If they previously chose NO, keep the stored preference as "no"
+                // (so next reload stays muted), but still start immediately.
                 const consent = localStorage.getItem(consentKey);
-                if (consent !== 'yes') {
+                if (consent === 'no') {
+                    hideConsent();
+                } else {
+                    // consent is 'yes' or not set -> treat as renewed consent.
                     try {
                         localStorage.setItem(consentKey, 'yes');
                     } catch (_) { /* ignore */ }
@@ -544,13 +654,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const consent = localStorage.getItem(consentKey);
+    const shouldResume = getSession(playingKey) === 'true';
+
     if (consent === 'yes') {
         hideConsent();
-        startBgm();
+        if (shouldResume) {
+            restoreBgmIfWasPlaying();
+        } else {
+            // Do not autoplay when BGM wasn't playing on the previous page.
+            pauseBgm();
+        }
+
         syncToggleText();
     } else if (consent === 'no') {
         hideConsent();
-        pauseBgm();
+        if (shouldResume) {
+            restoreBgmIfWasPlaying();
+        } else {
+            pauseBgm();
+        }
+
         syncToggleText();
     } else {
         // No stored preference yet -> wait for [OK]/[NO].

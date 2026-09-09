@@ -94,11 +94,20 @@ class NeuralNetworkBackground {
                 if (dist2 > r2) continue;
 
                 const dist = Math.sqrt(dist2) || 0.0001;
-                const w = 1 - dist / r;
+
+                // Link strength: inner -> strong, outer -> fade out
+                const rOuter = r;
+                const rInner = rOuter * 0.55;
+
+                // link: 1 when dist <= rInner, 0 when dist >= rOuter
+                const linkRaw = (rOuter - dist) / (rOuter - rInner);
+                const link = Math.max(0, Math.min(1, linkRaw));
+                const eased = link * link; // sharper “connect threshold”
 
                 const pulse = 0.65 + 0.35 * Math.sin(this.time * 1.2 + a.phase + b.phase);
-                const alpha = 0.02 + 0.18 * w * pulse;
-                const lineWidth = 0.3 + 1.4 * w * pulse;
+
+                const alpha = 0.005 + 0.26 * eased * pulse;
+                const lineWidth = 0.15 + 1.95 * eased * pulse;
 
                 ctx.strokeStyle = `rgba(120, 220, 255, ${alpha})`;
                 ctx.lineWidth = lineWidth;
@@ -111,7 +120,7 @@ class NeuralNetworkBackground {
                 // Spring-like forces
                 const nx = dx / dist;
                 const ny = dy / dist;
-                const force = this.strength * w * (0.7 + 0.3 * pulse);
+                const force = this.strength * eased * (0.7 + 0.3 * pulse);
 
                 a.vx += nx * force;
                 a.vy += ny * force;
@@ -205,8 +214,8 @@ class Card3DEffect {
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateX = (y - centerY) / 10;
-        const rotateY = (centerX - x) / 10;
+        const rotateX = (y - centerY) / 12;
+        const rotateY = (centerX - x) / 12;
 
         card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
     }
@@ -502,6 +511,84 @@ document.addEventListener('DOMContentLoaded', () => {
     const consentKey = 'bgm-consent'; // "yes" / "no"
     const volumeKey = 'bgm-volume';
 
+    // Page navigation resume state (tab-scoped)
+    const playingKey = 'bgm-playing';
+    const lastTimeKey = 'bgm-last-time';
+
+    const getSession = (key: string) => {
+        try {
+            return sessionStorage.getItem(key);
+        } catch (_) {
+            return null;
+        }
+    };
+
+    const setSession = (key: string, value: string) => {
+        try {
+            sessionStorage.setItem(key, value);
+        } catch (_) {
+            // ignore
+        }
+    };
+
+    const saveBgmProgress = () => {
+        if (!bgm) return;
+        const t = Number.isFinite(bgm.currentTime) ? Math.max(0, bgm.currentTime) : 0;
+        setSession(lastTimeKey, String(t));
+    };
+
+    const setBgmPlaying = (playing: boolean) => {
+        setSession(playingKey, playing ? 'true' : 'false');
+    };
+
+    const restoreBgmIfWasPlaying = () => {
+        if (!bgm) return;
+
+        // Only restore when user previously pressed play in this browser session.
+        const shouldResume = getSession(playingKey) === 'true';
+        if (!shouldResume) return;
+
+        applyVolume();
+
+        const tRaw = getSession(lastTimeKey);
+        const t = tRaw ? Number(tRaw) : 0;
+
+        const seekAndPlay = () => {
+            try {
+                if (Number.isFinite(t) && t >= 0) bgm.currentTime = t;
+            } catch (_) {
+                // ignore
+            }
+
+            const p = bgm.play();
+            if (p && typeof (p as Promise<void>).then === 'function') {
+                (p as Promise<void>).then(() => {
+                    setBgmPlaying(true);
+                }).catch(() => {
+                    setBgmPlaying(false);
+                    // If blocked, it will stay paused until user presses play again.
+                });
+            } else {
+                setBgmPlaying(true);
+            }
+
+            syncToggleText();
+        };
+
+        if (bgm.readyState >= 1) {
+            seekAndPlay();
+        } else {
+            bgm.addEventListener('loadedmetadata', () => seekAndPlay(), { once: true });
+        }
+    };
+
+    // Save BGM progress when leaving the page.
+    window.addEventListener('pagehide', () => {
+        if (!bgm) return;
+        setBgmPlaying(!bgm.paused);
+        saveBgmProgress();
+    });
+
     const hideConsent = () => {
         if (consentEl) consentEl.style.display = 'none';
     };
@@ -523,10 +610,19 @@ document.addEventListener('DOMContentLoaded', () => {
         applyVolume();
 
         const p = bgm.play();
-        if (p && typeof (p as Promise<void>).catch === 'function') {
-            (p as Promise<void>).catch(() => {
+        if (p && typeof (p as Promise<void>).then === 'function') {
+            (p as Promise<void>).then(() => {
+                setBgmPlaying(true);
+                syncToggleText();
+            }).catch(() => {
+                setBgmPlaying(false);
+                syncToggleText();
                 // Autoplay may still be blocked; user can try again with controls.
             });
+        } else {
+            // Some browsers may not return a promise.
+            setBgmPlaying(true);
+            syncToggleText();
         }
     };
 
@@ -537,7 +633,24 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (_) {
             // ignore
         }
+
+        setBgmPlaying(false);
+        saveBgmProgress();
+        syncToggleText();
     };
+
+    // Periodically save currentTime while playing (helps resume accurately across page navigation).
+    let bgmSaveTimer: number | null = null;
+    const startBgmSaveTimer = () => {
+        if (!bgm) return;
+        if (bgmSaveTimer) return;
+
+        bgmSaveTimer = window.setInterval(() => {
+            if (!bgm) return;
+            if (!bgm.paused) saveBgmProgress();
+        }, 1000);
+    };
+    startBgmSaveTimer();
 
     const volRange = document.getElementById('bgm-volume') as HTMLInputElement | null;
     const toggleBtn = document.getElementById('bgm-toggle') as HTMLButtonElement | null;
@@ -572,9 +685,14 @@ document.addEventListener('DOMContentLoaded', () => {
             applyVolume();
 
             if (bgm.paused) {
-                // Treat a user click as renewed consent.
+                // User pressed play.
+                // If they previously chose NO, keep the stored preference as "no"
+                // (so next reload stays muted), but still start immediately.
                 const consent = localStorage.getItem(consentKey);
-                if (consent !== 'yes') {
+                if (consent === 'no') {
+                    hideConsent();
+                } else {
+                    // consent is 'yes' or not set -> treat as renewed consent.
                     try {
                         localStorage.setItem(consentKey, 'yes');
                     } catch (_) {
@@ -593,14 +711,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const consent = localStorage.getItem(consentKey);
+    const shouldResume = getSession(playingKey) === 'true';
+
     if (consent === 'yes') {
         hideConsent();
-        startBgm();
-        syncToggleText();
+        if (shouldResume) {
+            restoreBgmIfWasPlaying();
+        } else {
+            // Do not autoplay when BGM wasn't playing on the previous page.
+            pauseBgm();
+        }
     } else if (consent === 'no') {
         hideConsent();
-        pauseBgm();
-        syncToggleText();
+        if (shouldResume) {
+            restoreBgmIfWasPlaying();
+        } else {
+            pauseBgm();
+        }
     } else {
         syncToggleText();
 
