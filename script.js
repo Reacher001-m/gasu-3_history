@@ -399,26 +399,22 @@ class ArticlesPage {
             if (item.content) {
                 const contentEl = document.createElement('div');
                 contentEl.className = 'article-hover-content';
-                // Preserve line breaks
                 contentEl.style.whiteSpace = 'pre-wrap';
-                contentEl.textContent = item.content;
+
+                // Replace URL text with actual link
+                const contentWithLink = item.content.replace(
+                    /(ファイルURL\s*→\s*)(https?:\/\/[^\s]+)/g,
+                    (match, prefix, url) => {
+                        return `${prefix}<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${url}</a>`;
+                    }
+                );
+
+                contentEl.innerHTML = contentWithLink;
                 card.appendChild(contentEl);
             }
 
-            if (item.url) {
-                const linkWrap = document.createElement('div');
-                linkWrap.className = 'article-link-wrap';
-
-                const a = document.createElement('a');
-                a.className = 'article-link';
-                a.href = item.url;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                a.textContent = '詳細 →';
-
-                linkWrap.appendChild(a);
-                card.appendChild(linkWrap);
-            }
+            // Remove the separate link section
+            // if (item.url) { ... }
 
             this.root.appendChild(card);
         }
