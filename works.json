@@ -2,7 +2,7 @@
   {
     "title": "gitの基本的な操作の確認ankiカード",
     "date": "2025-09-10",
-    "content": "gitの基本的な操作の確認ができるankiカードです。使用方法：urlからファイルをダウンロード、ankiを開き左上のファイル（F）からインポートでダウンロードしたファイルを選択。　ファイルURL→（https://www.dropbox.com/scl/fi/uflwk7yjp4x9xrfxxen1w/git.apkg?rlkey=n7h0eq35irh0l6m2ecd10e5oj&st=wdly7bhm&dl=0）",
+    "content": "gitの基本的な操作の確認ができるankiカードです。\n\n【使用方法】\n① 下記URLからファイルをダウンロード\n② ankiを開き、左上のファイル（F）からインポートを選択\n③ ダウンロードしたファイルを選択して完了\n\nファイルURL → https://www.dropbox.com/scl/fi/uflwk7yjp4x9xrfxxen1w/git.apkg?rlkey=n7h0eq35irh0l6m2ecd10e5oj&st=wdly7bhm&dl=0",
     "url": "https://www.dropbox.com/scl/fi/uflwk7yjp4x9xrfxxen1w/git.apkg?rlkey=n7h0eq35irh0l6m2ecd10e5oj&st=wdly7bhm&dl=0",
     "image": "anki.png"
   }

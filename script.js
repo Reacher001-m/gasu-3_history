@@ -399,6 +399,8 @@ class ArticlesPage {
             if (item.content) {
                 const contentEl = document.createElement('div');
                 contentEl.className = 'article-hover-content';
+                // Preserve line breaks
+                contentEl.style.whiteSpace = 'pre-wrap';
                 contentEl.textContent = item.content;
                 card.appendChild(contentEl);
             }
