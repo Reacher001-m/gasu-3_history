@@ -401,9 +401,9 @@ class ArticlesPage {
                 contentEl.className = 'article-hover-content';
                 contentEl.style.whiteSpace = 'pre-wrap';
 
-                // Replace "ファイルURL → URL" with clickable "ファイルURL →"
+                // Replace "ファイルURL →" or "データダウンロード →" with clickable links
                 const contentWithLink = item.content.replace(
-                    /(ファイルURL\s*→)\s*(https?:\/\/[^\s]+)/g,
+                    /((?:ファイルURL|データダウンロード)\s*→)\s*(https?:\/\/[^\s]+)/g,
                     (_match, prefix, url) => {
                         return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${prefix}</a>`;
                     }
