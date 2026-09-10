@@ -456,8 +456,14 @@ document.addEventListener('DOMContentLoaded', () => {
         new AchievementFilter();
     }
 
-    // 5) GitHub contributions calendar
-    new GitHubContributionsCalendar();
+    // 5) GitHub contributions calendar (profile page only)
+    const pageForGithub = document.body.dataset.page || 'index';
+    const githubActivityEl = document.querySelector('.github-activity');
+    if (pageForGithub === 'index') {
+        new GitHubContributionsCalendar();
+    } else if (githubActivityEl) {
+        githubActivityEl.innerHTML = '';
+    }
 
     // 6) Works / Vlog pages
     const bodyPage = document.body.dataset.page;
@@ -560,10 +566,20 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Save BGM progress when leaving the page.
-    window.addEventListener('pagehide', () => {
+    // Mobile browsers sometimes pause the audio automatically during navigation,
+    // so we should capture the playing state as early as possible.
+    const captureBgmState = () => {
         if (!bgm) return;
         setBgmPlaying(!bgm.paused);
         saveBgmProgress();
+    };
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') captureBgmState();
+    });
+
+    window.addEventListener('pagehide', () => {
+        captureBgmState();
     });
 
     const hideConsent = () => {
