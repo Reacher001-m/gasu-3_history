@@ -370,6 +370,20 @@ class ArticlesPage {
             const card = document.createElement('article');
             card.className = `article-card ${this.cardClassName}`.trim();
 
+            // Image (if present)
+            if (item.image) {
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'article-image-wrap';
+
+                const img = document.createElement('img');
+                img.src = item.image;
+                img.alt = item.title || '作品画像';
+                img.className = 'article-image';
+
+                imgWrap.appendChild(img);
+                card.appendChild(imgWrap);
+            }
+
             const titleEl = document.createElement('h3');
             titleEl.className = 'article-title';
             titleEl.textContent = item.title || 'Untitled';
@@ -378,13 +392,16 @@ class ArticlesPage {
             dateEl.className = 'article-date';
             dateEl.textContent = item.date || '';
 
-            const contentEl = document.createElement('p');
-            contentEl.className = 'article-content';
-            contentEl.textContent = item.content || '';
-
             card.appendChild(titleEl);
             if (item.date) card.appendChild(dateEl);
-            if (item.content) card.appendChild(contentEl);
+
+            // Hover description (content shown on hover)
+            if (item.content) {
+                const contentEl = document.createElement('div');
+                contentEl.className = 'article-hover-content';
+                contentEl.textContent = item.content;
+                card.appendChild(contentEl);
+            }
 
             if (item.url) {
                 const linkWrap = document.createElement('div');
