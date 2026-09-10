@@ -401,11 +401,11 @@ class ArticlesPage {
                 contentEl.className = 'article-hover-content';
                 contentEl.style.whiteSpace = 'pre-wrap';
 
-                // Replace URL text with actual link
+                // Replace "ファイルURL → URL" with clickable "ファイルURL →"
                 const contentWithLink = item.content.replace(
-                    /(ファイルURL\s*→\s*)(https?:\/\/[^\s]+)/g,
-                    (match, prefix, url) => {
-                        return `${prefix}<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${url}</a>`;
+                    /(ファイルURL\s*→)\s*(https?:\/\/[^\s]+)/g,
+                    (_match, prefix, url) => {
+                        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${prefix}</a>`;
                     }
                 );
 
