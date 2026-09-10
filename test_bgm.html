@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>BGM Test</title>
+</head>
+<body>
+<h1>BGM Consent Test</h1>
+<button onclick="clearConsent()">Clear BGM Consent</button>
+<button onclick="checkConsent()">Check Consent Status</button>
+<div id="status"></div>
+
+<script>
+function clearConsent() {
+    localStorage.removeItem('bgm-consent');
+    document.getElementById('status').textContent = 'BGM consent cleared! Reload the page.';
+}
+
+function checkConsent() {
+    const consent = localStorage.getItem('bgm-consent');
+    document.getElementById('status').textContent = 'Current consent: ' + (consent || 'none');
+}
+</script>
+</body>
+</html>
