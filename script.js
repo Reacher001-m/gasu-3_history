@@ -483,6 +483,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 7) BGM consent + play (user gesture)
     const consentEl = document.getElementById('bgm-consent');
+    if (consentEl) {
+        // Make sure the modal is visible until the user chooses.
+        consentEl.style.display = 'flex';
+    }
+
     const okBtn = document.getElementById('bgm-consent-ok');
     const noBtn = document.getElementById('bgm-consent-no');
     const bgm = document.getElementById('bgm');
@@ -563,6 +568,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hideConsent = () => {
         if (consentEl) consentEl.style.display = 'none';
+    };
+
+    const showConsent = () => {
+        if (consentEl) consentEl.style.display = 'flex';
     };
 
     const applyVolume = () => {
@@ -671,6 +680,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const consent = localStorage.getItem(consentKey);
     const shouldResume = getSession(playingKey) === 'true';
 
+    // Users sometimes already have a stored consent value, but they still expect
+    // to see the modal right after entering the site.
+    const consentAnsweredKey = 'bgm-consent-answered';
+    const answeredInThisSession = getSession(consentAnsweredKey) === 'true';
+
+    const bindConsentButtons = () => {
+        if (okBtn) {
+            okBtn.addEventListener('click', () => {
+                try {
+                    localStorage.setItem(consentKey, 'yes');
+                } catch (_) { /* ignore */ }
+                setSession(consentAnsweredKey, 'true');
+                hideConsent();
+                startBgm();
+                syncToggleText();
+            }, { once: true });
+        }
+
+        if (noBtn) {
+            noBtn.addEventListener('click', () => {
+                try {
+                    localStorage.setItem(consentKey, 'no');
+                } catch (_) { /* ignore */ }
+                setSession(consentAnsweredKey, 'true');
+                hideConsent();
+                pauseBgm();
+                syncToggleText();
+            }, { once: true });
+        }
+    };
+
+    if (!answeredInThisSession) {
+        // Always show once per browser session until the user decides.
+        showConsent();
+        bindConsentButtons();
+        syncToggleText();
+        return;
+    }
+
+    // Already decided in this session -> follow stored preference.
     if (consent === 'yes') {
         hideConsent();
         if (shouldResume) {
@@ -691,29 +740,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         syncToggleText();
     } else {
-        // No stored preference yet -> wait for [OK]/[NO].
+        // Fallback: treat as not decided.
+        showConsent();
+        bindConsentButtons();
         syncToggleText();
-
-        if (okBtn) {
-            okBtn.addEventListener('click', () => {
-                try {
-                    localStorage.setItem(consentKey, 'yes');
-                } catch (_) { /* ignore */ }
-                hideConsent();
-                startBgm();
-                syncToggleText();
-            }, { once: true });
-        }
-
-        if (noBtn) {
-            noBtn.addEventListener('click', () => {
-                try {
-                    localStorage.setItem(consentKey, 'no');
-                } catch (_) { /* ignore */ }
-                hideConsent();
-                pauseBgm();
-                syncToggleText();
-            }, { once: true });
-        }
     }
 });
