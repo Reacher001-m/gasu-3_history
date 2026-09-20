@@ -271,7 +271,9 @@ class AchievementFilter {
     assignCategories() {
         this.items.forEach(item => {
             const title = item.querySelector('.achievement-title')?.textContent?.toLowerCase() || '';
-            if (title.includes('試験') || title.includes('検定')) {
+            const award = item.querySelector('.achievement-award')?.textContent?.toLowerCase() || '';
+            const text = `${title} ${award}`;
+            if (text.includes('試験') || text.includes('検定') || text.includes('修了')) {
                 item.dataset.category = 'certification';
             } else if (title.includes('camp') || title.includes('キャリア甲子園') || title.includes('サイバー')) {
                 item.dataset.category = 'hackathon';
