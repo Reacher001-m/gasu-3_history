@@ -411,6 +411,13 @@ class ArticlesPage {
                 );
 
                 contentEl.innerHTML = contentWithLink;
+
+                // Vlog: add continuation link after the description
+                if (this.cardClassName === 'vlog-card' && item.url) {
+                    const a = `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="inline-link">続きはこちら→</a>`;
+                    contentEl.innerHTML = contentEl.innerHTML + `\n\n${a}`;
+                }
+
                 card.appendChild(contentEl);
             }
 
