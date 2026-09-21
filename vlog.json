@@ -1,6 +1,7 @@
 [
   {
     "title": "Ollama + Qwen3-Coder-NextでローカルClaude Code環境を作ろうとしてQwen Codeに苦戦した話",
+    "image": "images/vlog/qiita_icon.png",
     "content": "私は普段、OmniRouteを使ったコーディングをすることが多いのですが、そうなってくるとどうしてもAPIの制限に悩まされることが多くなってきました。そこで、『だったら自分のPCで動くコーディングLLMを作ればいいのでは？』と思い、ローカルLLMを使ったClaude Codeのようなコーディング環境を構築することにしました。",
     "url": "https://qiita.com/yuusi1128/items/fe23d0bfce4d35266b89"
   }

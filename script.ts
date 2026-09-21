@@ -357,6 +357,7 @@ interface ArticleItem {
     date?: string;
     content?: string;
     url?: string;
+    image?: string;
     [key: string]: unknown;
 }
 
@@ -410,6 +411,27 @@ class ArticlesPage {
         for (const item of list) {
             const card = document.createElement('article');
             card.className = `article-card ${this.cardClassName}`.trim();
+
+            // Image (if present)
+            if (item.image) {
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'article-image-wrap';
+
+                if (this.cardClassName === 'vlog-card') {
+                    const label = document.createElement('div');
+                    label.className = 'article-image-label';
+                    label.textContent = '[Image #3]';
+                    imgWrap.appendChild(label);
+                }
+
+                const img = document.createElement('img');
+                img.src = item.image;
+                img.alt = item.title || '作品画像';
+                img.className = 'article-image';
+
+                imgWrap.appendChild(img);
+                card.appendChild(imgWrap);
+            }
 
             const titleEl = document.createElement('h3');
             titleEl.className = 'article-title';
