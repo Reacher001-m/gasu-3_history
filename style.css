@@ -522,6 +522,13 @@ body {
     gap: 20px;
 }
 
+/* Make Vlog cards look like Achievements: one-column, full-width */
+.vlog-page .article-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 @media (max-width: 900px) {
     .article-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -552,15 +559,25 @@ body {
 /* Vlog: horizontal rectangular card (image on the left) */
 .article-card.vlog-card {
     display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 18px;
-    align-items: start;
-    min-height: 160px;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    align-items: stretch;
+    min-height: 180px;
+    padding: 20px;
+    border-left: 2px solid #444444;
+}
+
+/* Achievements-like hover */
+.article-card.vlog-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+    border-left-color: #ffffff;
 }
 
 .article-card.vlog-card .article-image-wrap {
-    width: 140px;
-    height: 140px;
+    width: 80px;
+    min-height: 120px;
+    height: auto;
     aspect-ratio: auto;
     margin-bottom: 0;
     background: rgba(0, 0, 0, 0.2);
@@ -608,20 +625,6 @@ body {
     justify-content: center;
 }
 
-.article-image-label {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 2;
-    font-size: 0.82rem;
-    line-height: 1;
-    padding: 8px 10px;
-    border-radius: 999px;
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    color: #e0e0e0;
-    backdrop-filter: blur(6px);
-}
 
 .article-image {
     width: 100%;

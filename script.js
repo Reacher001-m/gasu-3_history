@@ -377,13 +377,6 @@ class ArticlesPage {
                 const imgWrap = document.createElement('div');
                 imgWrap.className = 'article-image-wrap';
 
-                if (this.cardClassName === 'vlog-card') {
-                    const label = document.createElement('div');
-                    label.className = 'article-image-label';
-                    label.textContent = '[Image #3]';
-                    imgWrap.appendChild(label);
-                }
-
                 const img = document.createElement('img');
                 img.src = item.image;
                 img.alt = item.title || '作品画像';
@@ -410,7 +403,6 @@ class ArticlesPage {
                 contentEl.className = 'article-hover-content';
                 contentEl.style.whiteSpace = 'pre-wrap';
 
-                // Replace "ファイルURL →" or "データダウンロード →" with clickable links
                 const contentWithLink = item.content.replace(
                     /((?:ファイルURL|データダウンロード)\s*→)\s*(https?:\/\/[^\s]+)/g,
                     (_match, prefix, url) => {
@@ -422,8 +414,7 @@ class ArticlesPage {
                 card.appendChild(contentEl);
             }
 
-            // Remove the separate link section
-            // if (item.url) { ... }
+            // (url is intentionally not shown separately for these cards)
 
             this.root.appendChild(card);
         }

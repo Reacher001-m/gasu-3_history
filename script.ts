@@ -417,13 +417,6 @@ class ArticlesPage {
                 const imgWrap = document.createElement('div');
                 imgWrap.className = 'article-image-wrap';
 
-                if (this.cardClassName === 'vlog-card') {
-                    const label = document.createElement('div');
-                    label.className = 'article-image-label';
-                    label.textContent = '[Image #3]';
-                    imgWrap.appendChild(label);
-                }
-
                 const img = document.createElement('img');
                 img.src = item.image;
                 img.alt = item.title || '作品画像';
