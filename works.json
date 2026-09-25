@@ -12,5 +12,12 @@
     "content": "私の母校の教育方針で掲げている言葉。意味は知らないネタ枠。\n\nデータダウンロード → https://www.dropbox.com/scl/fo/o3ibefe5kb9pq25lua1bl/AJzgK1I6H3A4RGKwfm7O1Lk?rlkey=9hsee5yqxdczw1sfvna5pde4l&st=emyoahut&dl=0",
     "url": "https://www.dropbox.com/scl/fo/o3ibefe5kb9pq25lua1bl/AJzgK1I6H3A4RGKwfm7O1Lk?rlkey=9hsee5yqxdczw1sfvna5pde4l&st=emyoahut&dl=0",
     "image": "images/works/titokutai.jpg"
+  },
+  {
+    "title": "git/githubを手で動かしながら学ぼう！",
+    "data": "2026-09-25",
+    "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。もし不具合があったらgithubに上がっているので何なら修正してみてください。\n\nサイト→",
+    "url": "https://git-test.yuusi.workers.dev/",
+    "image": "images/works/git-Icon.png"
   }
 ]
