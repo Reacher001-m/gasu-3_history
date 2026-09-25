@@ -3,21 +3,18 @@
     "title": "gitの基本的な操作の確認ankiカード",
     "date": "2025-09-10",
     "content": "gitの基本的な操作の確認ができるankiカードです。\n\n【使用方法】\n① 下記URLからファイルをダウンロード\n② ankiを開き、左上のファイル（F）からインポートを選択\n③ ダウンロードしたファイルを選択して完了\n\nファイルURL → https://www.dropbox.com/scl/fi/uflwk7yjp4x9xrfxxen1w/git.apkg?rlkey=n7h0eq35irh0l6m2ecd10e5oj&st=wdly7bhm&dl=0",
-    "url": "https://www.dropbox.com/scl/fi/uflwk7yjp4x9xrfxxen1w/git.apkg?rlkey=n7h0eq35irh0l6m2ecd10e5oj&st=wdly7bhm&dl=0",
     "image": "images/works/anki.png"
   },
   {
     "title": "知徳体CADデータ",
     "date": "2026-09-10",
     "content": "私の母校の教育方針で掲げている言葉。意味は知らないネタ枠。\n\nデータダウンロード → https://www.dropbox.com/scl/fo/o3ibefe5kb9pq25lua1bl/AJzgK1I6H3A4RGKwfm7O1Lk?rlkey=9hsee5yqxdczw1sfvna5pde4l&st=emyoahut&dl=0",
-    "url": "https://www.dropbox.com/scl/fo/o3ibefe5kb9pq25lua1bl/AJzgK1I6H3A4RGKwfm7O1Lk?rlkey=9hsee5yqxdczw1sfvna5pde4l&st=emyoahut&dl=0",
     "image": "images/works/titokutai.jpg"
   },
   {
     "title": "git/githubを手で動かしながら学ぼう！",
     "data": "2026-09-25",
-    "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。もし不具合があったらgithubに上がっているので何なら修正してみてください。\n\nサイト→",
-    "url": "https://git-test.yuusi.workers.dev/",
+    "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。もし不具合があったらgithubに上がっているので何なら修正してみてください。\n\nサイト → https://git-test.yuusi.workers.dev/",
     "image": "images/works/git-Icon.png"
   }
 ]
