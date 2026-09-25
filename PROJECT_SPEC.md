@@ -166,16 +166,31 @@
 - `url`（任意、ある場合にだけリンクを表示）
 - `image`（任意、ある場合にだけ画像を表示）
 
-例（vlog.json の1要素）:
+例（works.json の1要素）:
 
 ```json
 {
-  "title": "題名",
-  "image": "images/vlog/note_icon.jpg",
-  "content": "記事本文（\n を含めてもOK）",
-  "url": "https://..."
+  "title": "git/githubを手で動かしながら学ぼう",
+  "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。もし不具合があったらgithubに上がっているので何なら修正してみてください。\n\nサイト → https://git-test.yuusi.workers.dev/",
+  "image": "images/works/git-Icon.png"
 }
 ```
+
+### 6.4 Works/Vlogカードの見え方（現状）
+
+- `works.json` / `vlog.json` の各要素は `title`（必須）に加え、次の要素が任意です。
+  - `date`：存在する場合だけタイトルの下に表示
+  - `content`：存在する場合だけホバー時に「記事本文」枠として表示
+  - `url`：存在する場合だけ `content` の直後に `続きはこちら→` リンクを追加（`works`/`vlog` 共通）
+  - `image`：存在する場合だけ左側に画像（アイコン）を表示
+- `content` 内の自動リンク変換（インライン）:
+  - `ファイルURL → https://...`
+  - `データダウンロード → https://...`
+
+  上記2パターン以外（例：`サイト → https://...`）はリンク化されず、テキストとして表示されます（`url` フィールドがある場合は別途 `続きはこちら→` が追加されます）。
+
+- UIのレイアウトは `works` と `vlog` で同じカードフォーマット（画像左 + 1カラム縦積み）になっています。
+
 
 ---
 

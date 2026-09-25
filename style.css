@@ -569,12 +569,45 @@ body {
     border-left: 2px solid #444444;
 }
 
+/* Works: slightly more stylish accent */
+.article-card.works-card {
+    background: linear-gradient(135deg, rgba(120, 220, 255, 0.10) 0%, rgba(26, 26, 26, 1) 62%);
+    border: 1px solid rgba(120, 220, 255, 0.22);
+}
+
+.article-card.works-card:hover {
+    box-shadow: 0 12px 34px rgba(120, 220, 255, 0.16), 0 8px 24px rgba(255, 255, 255, 0.08);
+    border-left-color: #78dcff;
+}
+
+.article-card.works-card .article-image-wrap {
+    background: rgba(120, 220, 255, 0.05);
+    border: 1px solid rgba(120, 220, 255, 0.35);
+    padding: 8px;
+}
+
+.article-card.works-card .article-title {
+    letter-spacing: 0.01em;
+    font-weight: 650;
+}
+
+.article-card.works-card .article-hover-content {
+    background: rgba(120, 220, 255, 0.06);
+    border-left-color: #78dcff;
+}
+
 /* Achievements-like hover */
 .article-card.vlog-card:hover,
 .article-card.works-card:hover {
     transform: translateX(4px);
     box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
     border-left-color: #ffffff;
+}
+
+/* Works: stronger neon accent */
+.article-card.works-card:hover {
+    box-shadow: 0 14px 40px rgba(120, 220, 255, 0.18), 0 8px 24px rgba(255, 255, 255, 0.08);
+    border-left-color: #78dcff;
 }
 
 .article-card.vlog-card .article-image-wrap,
