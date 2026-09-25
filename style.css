@@ -522,8 +522,9 @@ body {
     gap: 20px;
 }
 
-/* Make Vlog cards look like Achievements: one-column, full-width */
-.vlog-page .article-grid {
+/* Make Vlog/Works cards look like Achievements: one-column, full-width */
+.vlog-page .article-grid,
+.works-page .article-grid {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -556,8 +557,9 @@ body {
     box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
 }
 
-/* Vlog: horizontal rectangular card (image on the left) */
-.article-card.vlog-card {
+/* Vlog/Works: horizontal rectangular card (image on the left) */
+.article-card.vlog-card,
+.article-card.works-card {
     display: grid;
     grid-template-columns: 80px 1fr;
     gap: 24px;
@@ -568,13 +570,15 @@ body {
 }
 
 /* Achievements-like hover */
-.article-card.vlog-card:hover {
+.article-card.vlog-card:hover,
+.article-card.works-card:hover {
     transform: translateX(4px);
     box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
     border-left-color: #ffffff;
 }
 
-.article-card.vlog-card .article-image-wrap {
+.article-card.vlog-card .article-image-wrap,
+.article-card.works-card .article-image-wrap {
     width: 80px;
     min-height: 120px;
     height: auto;
@@ -586,18 +590,24 @@ body {
 .article-card.vlog-card .article-title,
 .article-card.vlog-card .article-date,
 .article-card.vlog-card .article-hover-content,
-.article-card.vlog-card .article-content {
+.article-card.vlog-card .article-content,
+.article-card.works-card .article-title,
+.article-card.works-card .article-date,
+.article-card.works-card .article-hover-content,
+.article-card.works-card .article-content {
     grid-column: 2;
 }
 
 @media (max-width: 600px) {
-    .article-card.vlog-card {
+    .article-card.vlog-card,
+    .article-card.works-card {
         grid-template-columns: 1fr;
         gap: 14px;
         min-height: 0;
     }
 
-    .article-card.vlog-card .article-image-wrap {
+    .article-card.vlog-card .article-image-wrap,
+    .article-card.works-card .article-image-wrap {
         width: 100%;
         height: auto;
         aspect-ratio: 1 / 1;
@@ -607,7 +617,11 @@ body {
     .article-card.vlog-card .article-title,
     .article-card.vlog-card .article-date,
     .article-card.vlog-card .article-hover-content,
-    .article-card.vlog-card .article-content {
+    .article-card.vlog-card .article-content,
+    .article-card.works-card .article-title,
+    .article-card.works-card .article-date,
+    .article-card.works-card .article-hover-content,
+    .article-card.works-card .article-content {
         grid-column: auto;
     }
 }

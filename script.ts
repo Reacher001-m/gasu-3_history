@@ -438,8 +438,8 @@ class ArticlesPage {
             contentEl.className = 'article-content';
             contentEl.textContent = item.content || '';
 
-            // Vlog: add continuation link after the description
-            if (this.cardClassName === 'vlog-card' && item.url) {
+            // Vlog/Works: add continuation link after the description
+            if ((this.cardClassName === 'vlog-card' || this.cardClassName === 'works-card') && item.url && item.content) {
                 contentEl.appendChild(document.createElement('br'));
 
                 const a = document.createElement('a');
@@ -456,20 +456,6 @@ class ArticlesPage {
             if (item.date) card.appendChild(dateEl);
             if (item.content) card.appendChild(contentEl);
 
-            if (item.url && this.cardClassName !== 'vlog-card') {
-                const linkWrap = document.createElement('div');
-                linkWrap.className = 'article-link-wrap';
-
-                const a = document.createElement('a');
-                a.className = 'article-link';
-                a.href = item.url;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                a.textContent = '詳細 →';
-
-                linkWrap.appendChild(a);
-                card.appendChild(linkWrap);
-            }
 
             this.root.appendChild(card);
         }
