@@ -406,25 +406,24 @@ class ArticlesPage {
                 contentEl.className = 'article-hover-content';
                 contentEl.style.whiteSpace = 'pre-wrap';
 
-                let html = '';
                 if (item.content) {
-                    html = item.content.replace(
-                        /((?:ファイルURL|データダウンロード)\s*→)\s*(https?:\/\/[^\s]+)/g,
-                        (_match, prefix, url) => {
-                            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${prefix}</a>`;
-                        }
-                    );
+                    contentEl.textContent = item.content;
                 }
 
-                // Vlog/Works: add continuation link after the description
+                // Vlog/Works: 続きはこちら→ リンク（本文は遷移先にリンクを埋め込む）
                 if (hasLink) {
-                    const external = Boolean(item.url);
-                    const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
-                    const a = `<a href="${linkHref}"${attrs} class="inline-link">続きはこちら→</a>`;
-                    html += `${html ? '\n\n' : ''}${a}`;
-                }
+                    if (item.content) contentEl.appendChild(document.createTextNode('\n\n'));
 
-                contentEl.innerHTML = html;
+                    const a = document.createElement('a');
+                    a.className = 'inline-link';
+                    a.href = linkHref;
+                    if (item.url) {
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                    }
+                    a.textContent = '続きはこちら→';
+                    contentEl.appendChild(a);
+                }
 
                 card.appendChild(contentEl);
             }
