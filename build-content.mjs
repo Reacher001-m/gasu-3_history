@@ -43,17 +43,34 @@ function escapeHtml(s) {
 
 function renderInline(escaped) {
     let s = escaped;
+    // 後続の変換（ラベルリンク・自動リンク・太字）の対象外にするHTMLを退避する
+    const stash = [];
+    const keep = html => `\u0001${stash.push(html) - 1}\u0001`;
+
     s = s.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, alt, url) => `<img src="${url}" alt="${alt}">`);
     s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,
         (_m, text, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`);
-    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // インラインコードは以降の変換から保護
+    s = s.replace(/`([^`]+)`/g, (_m, code) => keep(`<code>${code}</code>`));
     s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    // 「ラベル → URL」（ファイルURL → / データダウンロード → / サイト → 等）を
+    // ラベル文字にURLを埋め込んだ1つのリンクにする
+    s = s.replace(/([^\s<>]{1,40}\s*→)\s*(https?:\/\/[^\s<]+)/g, (_m, label, url) => {
+        const trimmed = url.replace(/[.,:;!?、。）)\]]+$/, '');
+        const rest = url.slice(trimmed.length);
+        return keep(
+            `<a href="${trimmed}" target="_blank" rel="noopener noreferrer">${label} ${trimmed}</a>`
+        ) + rest;
+    });
+    // 生URLの自動リンク
     s = s.replace(/(^|[\s（(])(https?:\/\/[^\s<]+)/g, (m, pre, url) => {
         const trimmed = url.replace(/[.,:;!?、。）)\]]+$/, '');
         const rest = url.slice(trimmed.length);
         if (trimmed.length < 11 || trimmed.includes('&lt;')) return m;
         return `${pre}<a href="${trimmed}" target="_blank" rel="noopener noreferrer">${trimmed}</a>${rest}`;
     });
+    // 退避したHTMLを戻す
+    s = s.replace(/\u0001(\d+)\u0001/g, (_m, i) => stash[Number(i)]);
     return s;
 }
 
