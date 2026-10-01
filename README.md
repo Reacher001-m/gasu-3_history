@@ -17,6 +17,7 @@ title: タイトル（必須）
 date: 2026.01.15
 image: images/works/xxx.png
 url: https://...        ← 任意（書くと「続きはこちら」が外部リンクになる）
+summary: ホバーに出す短い説明（任意・省略時は本文が使われる）
 ---
 ## 見出し
 

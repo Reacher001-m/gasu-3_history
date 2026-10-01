@@ -24,7 +24,7 @@ const SOURCES = [
     { type: 'works', dir: path.join('content', 'works'), out: 'works.json', listPage: 'works.html', listLabel: 'Works' },
     { type: 'vlog', dir: path.join('content', 'vlog'), out: 'vlog.json', listPage: 'vlog.html', listLabel: 'Vlog' },
 ];
-const ALLOWED_KEYS = ['title', 'date', 'image', 'url'];
+const ALLOWED_KEYS = ['title', 'date', 'image', 'url', 'summary'];
 
 const errors = [];
 const warnings = [];
@@ -335,7 +335,9 @@ function build() {
             if (e.meta.title) item.title = e.meta.title;
             if (e.meta.date) item.date = e.meta.date;
             if (e.meta.image) item.image = e.meta.image;
-            if (e.body) item.content = toPlainText(e.body);
+            // ホバー説明：summary があればそれを、なければ本文のプレーンテキスト
+            const hoverText = e.meta.summary || (e.body ? toPlainText(e.body) : '');
+            if (hoverText) item.content = hoverText;
             if (e.meta.url) item.url = e.meta.url;
             item.link = `${ARTICLES_DIR}/${e.pageFile}`;
             items.push(item);
