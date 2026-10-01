@@ -304,3 +304,14 @@ front matter の注意：
 
 - 描画や挙動を変える場合は `script.ts` と `script.js` の両方に反映する（HTMLは `script.js` を参照）
 - カードの見た目を変える場合は `style.css` の `.article-card.*` を参照（`content/` は無関係）
+
+### 8.3 デプロイ（Cloudflare Workers Static Assets）
+
+- `wrangler.jsonc`（コミット済み）で静的サイトとしてデプロイする
+  - `assets.directory: "."`（リポジトリルートがそのままアセット）
+  - Worker名 `gasu-3-history`、`compatibility_date` はデプロイ時に更新してよい
+- デプロイコマンド：`npx wrangler deploy`（設定ファイルがあるためセットアップ質問は出ない）
+- `.assetsignore` がアップロード除外を制御（gitignore記法）
+  - 除外：`node_modules` / `content` / `*.md` / `wrangler.jsonc` / `package.json` / `script.ts` 等
+  - **必要ファイル（`*.html` / `style.css` / `script.js` / `*.json` / `articles/` / `images/` / `bgm.mp3` / `kopa.jpg`）は絶対に除外しない**
+- 動作確認はローカルで可能：`npx wrangler deploy --dry-run`（アップロードせずアセット検査のみ。25MiB超のファイルがあるとエラーになる）

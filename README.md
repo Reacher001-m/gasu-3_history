@@ -45,3 +45,18 @@ npm run check   # md と生成物の整合を検査（不一致なら exit 1）
 npx serve .
 # または Live Server 等
 ```
+
+## Cloudflare へのデプロイ
+
+設定ファイルはリポジトリにコミット済みです。
+
+- `wrangler.jsonc` … Worker名 `gasu-3-history`、assets directory はリポジトリルート
+- `.assetsignore` … アップロード除外（`node_modules` / `content` / `*.md` / `package.json` など）
+- デプロイコマンド：`npx wrangler deploy`（Cloudflare側の設定のまま使える）
+
+```bash
+npx wrangler deploy --dry-run   # 任意: アップロードせず検査のみ
+git add -A && git commit -m "update" && git push   # pushすると自動デプロイ
+```
+
+※ `node_modules/workerd` のように25MiBを超えるファイルがアセットに入るとデプロイが失敗します。`node_modules` は必ず `.assetsignore` に残してください。

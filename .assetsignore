@@ -1,0 +1,16 @@
+﻿# 開発用ファイルはアップロードしない（gitignore記法）
+node_modules
+.git
+.claude
+.opencode
+.wrangler
+content
+build-content.mjs
+package.json
+package-lock.json
+wrangler.jsonc
+.gitignore
+*.md
+script.ts
+test_bgm.html
+opencode.json
