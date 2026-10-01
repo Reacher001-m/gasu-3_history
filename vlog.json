@@ -3,12 +3,14 @@
     "title": "Ollama + Qwen3-Coder-NextでローカルClaude Code環境を作ろうとしてQwen Codeに苦戦した話",
     "image": "images/vlog/qiita_icon.png",
     "content": "私は普段、OmniRouteを使ったコーディングをすることが多いのですが、そうなってくるとどうしてもAPIの制限に悩まされることが多くなってきました。そこで、『だったら自分のPCで動くコーディングLLMを作ればいいのでは？』と思い、ローカルLLMを使ったClaude Codeのようなコーディング環境を構築することにしました。",
-    "url": "https://qiita.com/yuusi1128/items/fe23d0bfce4d35266b89"
+    "url": "https://qiita.com/yuusi1128/items/fe23d0bfce4d35266b89",
+    "link": "articles/vlog-001-ollama-qwen-code.html"
   },
   {
     "title": "家のデスクトップPCをリモートデスクトップする方法備忘録",
     "image": "images/vlog/note_icon.jpg",
     "content": "きっかけは大学生として屋外で作業する場面が多く、デスクトップとノートPCで環境がバラバラなことに不便を感じたことでした。\n\nもちろん、Dockerで環境を統一したりクラウド上でデータを管理したりすれば解決しますが、過去のすべてのデータを移行するのはあまり効率的ではありません。\n\nそこで、自宅のデスクトップPC環境をベースにし、外出先からリモートデスクトップで操作する形を目指しました。",
-    "url": "https://note.com/gasu_ketu1024/n/naf51a4271743"
+    "url": "https://note.com/gasu_ketu1024/n/naf51a4271743",
+    "link": "articles/vlog-002-remote-desktop.html"
   }
 ]

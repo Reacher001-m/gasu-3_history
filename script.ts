@@ -358,6 +358,7 @@ interface ArticleItem {
     content?: string;
     url?: string;
     image?: string;
+    link?: string;
     [key: string]: unknown;
 }
 
@@ -439,14 +440,17 @@ class ArticlesPage {
             contentEl.textContent = item.content || '';
 
             // Vlog/Works: add continuation link after the description
-            if ((this.cardClassName === 'vlog-card' || this.cardClassName === 'works-card') && item.url && item.content) {
+            const linkHref = item.url || item.link;
+            if ((this.cardClassName === 'vlog-card' || this.cardClassName === 'works-card') && linkHref && item.content) {
                 contentEl.appendChild(document.createElement('br'));
 
                 const a = document.createElement('a');
                 a.className = 'article-link';
-                a.href = item.url;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
+                a.href = linkHref;
+                if (item.url) {
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                }
                 a.textContent = '続きはこちら→';
 
                 contentEl.appendChild(a);

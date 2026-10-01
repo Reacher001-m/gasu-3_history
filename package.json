@@ -1,0 +1,9 @@
+{
+  "name": "gasu-3_history",
+  "private": true,
+  "description": "静的ポートフォリオサイト（content/*.md から works.json / vlog.json を生成）",
+  "scripts": {
+    "build": "node build-content.mjs",
+    "check": "node build-content.mjs --check"
+  }
+}

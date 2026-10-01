@@ -398,25 +398,33 @@ class ArticlesPage {
             if (item.date) card.appendChild(dateEl);
 
             // Hover description (content shown on hover)
-            if (item.content) {
+            const linkHref = item.url || item.link;
+            const hasLink = (this.cardClassName === 'vlog-card' || this.cardClassName === 'works-card') && linkHref;
+
+            if (item.content || hasLink) {
                 const contentEl = document.createElement('div');
                 contentEl.className = 'article-hover-content';
                 contentEl.style.whiteSpace = 'pre-wrap';
 
-                const contentWithLink = item.content.replace(
-                    /((?:ファイルURL|データダウンロード)\s*→)\s*(https?:\/\/[^\s]+)/g,
-                    (_match, prefix, url) => {
-                        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${prefix}</a>`;
-                    }
-                );
-
-                contentEl.innerHTML = contentWithLink;
+                let html = '';
+                if (item.content) {
+                    html = item.content.replace(
+                        /((?:ファイルURL|データダウンロード)\s*→)\s*(https?:\/\/[^\s]+)/g,
+                        (_match, prefix, url) => {
+                            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-link">${prefix}</a>`;
+                        }
+                    );
+                }
 
                 // Vlog/Works: add continuation link after the description
-                if ((this.cardClassName === 'vlog-card' || this.cardClassName === 'works-card') && item.url) {
-                    const a = `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="inline-link">続きはこちら→</a>`;
-                    contentEl.innerHTML = contentEl.innerHTML + `\n\n${a}`;
+                if (hasLink) {
+                    const external = Boolean(item.url);
+                    const attrs = external ? ' target="_blank" rel="noopener noreferrer"' : '';
+                    const a = `<a href="${linkHref}"${attrs} class="inline-link">続きはこちら→</a>`;
+                    html += `${html ? '\n\n' : ''}${a}`;
                 }
+
+                contentEl.innerHTML = html;
 
                 card.appendChild(contentEl);
             }

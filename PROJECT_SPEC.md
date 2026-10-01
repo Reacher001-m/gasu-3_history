@@ -11,8 +11,8 @@
   - スタイル：`style.css`
   - 挙動：`script.js`（各HTMLで `defer` 読み込み）
 - **データ駆動**：
-  - Works：`works.json`
-  - Vlog：`vlog.json`
+  - Works：`content/works/*.md` →（`npm run build`）→ `works.json` + `articles/works-*.html`
+  - Vlog：`content/vlog/*.md` →（`npm run build`）→ `vlog.json` + `articles/vlog-*.html`
 - **TypeScriptソース**：`script.ts`（参考/ソース）
   - 実際にブラウザで動くのは `script.js`
   - 仕様変更は原則として **`script.ts` と `script.js` の両方**へ反映します（HTMLは `script.js` を参照）。
@@ -38,8 +38,18 @@
   - TypeScript 実装（ソース）
 - `script.js`
   - ブラウザで実行される JavaScript（実運用）
-- `works.json`
-- `vlog.json`
+- `content/`（**Works/Vlog の追加はここで行う**）
+  - `content/works/*.md` / `content/vlog/*.md`
+  - 1エントリ = 1ファイル（front matter + Markdown本文）
+- `build-content.mjs`
+  - `content/**/*.md` を読み、`works.json` / `vlog.json` と記事詳細ページ `articles/*.html` を生成
+  - Markdownパーサーは自作（依存パッケージなし）
+- `articles/`（**生成物**）
+  - Markdownを整形した記事詳細ページ。一覧カードの「続きはこちら→」から遷移
+- `package.json`
+  - `npm run build`（生成） / `npm run check`（mdと生成物の整合検査）
+- `works.json` / `vlog.json`
+  - **生成物（手編集しない）**。`content/` のmdから `npm run build` で再生成する
 - `opencode.json`
   - opencode.ai のローカルLLM設定（Ollama / baseURLなど）
 - `images/`
@@ -140,9 +150,62 @@
 
 ---
 
-## 6. Works / Vlog（JSON駆動）
+## 6. Works / Vlog（Markdown → JSON 生成）
 
-### 6.1 ArticlesPage の役割
+`works.json` / `vlog.json` は **生成物** です。追加・編集は `content/` 配下の `.md` で行い、`npm run build` でJSONを再生成します（直接編集すると次のビルドで上書きされます）。
+
+### 6.1 Works/Vlog への追加手順
+
+1. 画像（任意）を `images/works/` または `images/vlog/` に置く
+2. `content/works/` または `content/vlog/` に `.md` を新規作成
+   - ファイル名：`001-任意の名前.md` のように **先頭の数字で表示順** を決める（昇順）
+3. front matter（`---` で囲む `key: value`）と本文を書く
+
+```markdown
+---
+title: 作品タイトル（必須）
+date: 2026.01.15        ← 任意。カードに表示される日付
+image: images/works/xxx.png  ← 任意
+url: https://...        ← 任意。設定すると「続きはこちら→」が外部リンクになる
+---
+## 見出し
+
+本文。改行はそのまま書ける（\n エスケープ不要）。
+
+- 箇条書き
+- **太字** / `コード`
+[リンク](https://example.com)
+```
+
+4. `npm run build` を実行
+   - `works.json` / `vlog.json` を再生成
+   - Markdown本文を整形した記事詳細ページ `articles/<type>-<filename>.html` を生成（不要な古いページは自動削除）
+5. （CI/コミット前）`npm run check` で md と生成物の整合を検査
+
+front matter の注意：
+- 対応キーは `title` / `date` / `image` / `url` のみ（それ以外は警告して無視）
+- `title` が無いとエラーになり、生成物は更新されない
+- `image` のパスが実在しない場合は警告
+- 本文が空でも `url` があれば可
+- 1行1キーの単純形式のみ対応（YAMLライブラリ不使用・ネスト不可）
+
+対応するMarkdown記法（`build-content.mjs` の自作パーサー）：
+- 見出し（`#`〜`######`）、段落（改行は `<br>`）、水平線（`---`）
+- **太字**、`インラインコード`、リスト（`-` / `1.`）、引用（`>`）
+- `[テキスト](url)`、`![代替](path)`、フェンスコードブロック（ ``` ）
+- 生URLの自動リンク化
+- HTMLタグはエスケープされXSS対応済み
+- 本文中の `images/...` パスは詳細ページ用に `../images/...` へ自動書き換え
+
+### 6.1.1 記事詳細ページ（`articles/*.html`）
+
+- 1エントリ = 1ページ。テンプレートは `build-content.mjs` 内の `renderArticlePage()` が生成
+- ヘッダー / タブ / BGMコントロール / フッターは `works.html` と同じ流用（`../` 相対パス）
+- 本文は `.article-body`（`style.css` 末尾）で既存配色（背景 `#1a1a1a` 系・文字 `#e0e0e0`・リンク `#78dcff`）を踏襲
+- 「← Works/Vlog 一覧へ戻る」リンク（`.article-back`）付き
+- `body[data-page]` は一覧側と同じ値にするため、タブの active 表示が一覧と連動する
+
+### 6.2 ArticlesPage の役割
 
 - `body[data-page='works'|'vlog']` に応じて `ArticlesPage` を起動します。
 - 共通ローダーが以下を実施：
@@ -150,38 +213,43 @@
   2. 各要素から記事カード（`article`）を生成
   3. root へ append
 
-### 6.2 fetch の前提
+### 6.3 fetch の前提
 
 - 実装は `fetch(this.jsonPath, { cache: 'no-store' })`。
 - ブラウザの制約により `file://` 起動だと JSON取得が失敗し得ます。
 - まずはローカルサーバ（Live Server 等）で起動してください。
 
-### 6.3 JSONスキーマ（想定）
+### 6.4 JSONスキーマ（生成結果の想定）
 
 `works.json` / `vlog.json` は配列で、各要素は以下フィールド。
 
 - `title`（必須）
 - `date`（任意、ある場合にだけ表示）
-- `content`（任意、ある場合にだけ表示）
-- `url`（任意、ある場合にだけリンクを表示）
+- `content`（任意、md本文のプレーンテキスト版。ホバー時に表示）
+- `url`（任意、ある場合にだけ外部リンクを表示）
 - `image`（任意、ある場合にだけ画像を表示）
+- `link`（**常に付与**。生成済み記事詳細ページ `articles/...html` のパス）
 
 例（works.json の1要素）:
 
 ```json
 {
   "title": "git/githubを手で動かしながら学ぼう",
-  "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。もし不具合があったらgithubに上がっているので何なら修正してみてください。\n\nサイト → https://git-test.yuusi.workers.dev/",
-  "image": "images/works/git-Icon.png"
+  "content": "gitコマンドを自由に打ったり…\n\nサイト → https://git-test.yuusi.workers.dev/",
+  "image": "images/works/git-Icon.png",
+  "link": "articles/works-003-git-site.html"
 }
 ```
 
-### 6.4 Works/Vlogカードの見え方（現状）
+### 6.5 Works/Vlogカードの見え方（現状）
 
 - `works.json` / `vlog.json` の各要素は `title`（必須）に加え、次の要素が任意です。
   - `date`：存在する場合だけタイトルの下に表示
   - `content`：存在する場合だけホバー時に「記事本文」枠として表示
-  - `url`：存在する場合だけ `content` の直後に `続きはこちら→` リンクを追加（`works`/`vlog` 共通）
+  - `url` / `link`：`content` の直後に `続きはこちら→` リンクを追加（`works`/`vlog` 共通）
+    - **優先順位は `url`（外部） > `link`（記事詳細ページ）**
+    - 外部URLは新規タブ、記事ページは同一タブで開く
+    - 一覧から記事ページへ遷移させたい場合は `url` を書かない（自動付与される `link` が使われる）
   - `image`：存在する場合だけ左側に画像（アイコン）を表示
 - `content` 内の自動リンク変換（インライン）:
   - `ファイルURL → https://...`
@@ -224,3 +292,15 @@
 ---
 
 ## 8. 変更時の開発ガイド（重要）
+
+### 8.1 Works/Vlog の追加・編集時
+
+1. `content/works/` `content/vlog/` の `.md` を編集（JSON / HTML は直接触らない）
+2. `npm run build` で `works.json` / `vlog.json` / `articles/*.html` を再生成
+3. `npm run check` で整合確認（差分があれば exit 1）
+4. **生成物（`works.json` / `vlog.json` / `articles/`）もコミット対象**（静的配信のためビルドが使われない）
+
+### 8.2 それ以外の変更時
+
+- 描画や挙動を変える場合は `script.ts` と `script.js` の両方に反映する（HTMLは `script.js` を参照）
+- カードの見た目を変える場合は `style.css` の `.article-card.*` を参照（`content/` は無関係）
