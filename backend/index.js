@@ -4,9 +4,10 @@
 // - Workerは「リクエストを受けてレスポンスを返す」関数の集まり
 import { json } from "./http.js";
 import { handleCountGet, handleCountPost } from "./counter.js";
+import { handleContactPost } from "./contact.js";
 
 // ルーティング表: 存在するパスの一覧（405判定にも使う）
-const KNOWN_PATHS = ["/api/health", "/api/count"];
+const KNOWN_PATHS = ["/api/health", "/api/count", "/api/contact"];
 
 export default {
   async fetch(request, env, ctx) {
@@ -29,6 +30,8 @@ export default {
         return handleCountGet(request, url, env);
       case "POST /api/count":
         return handleCountPost(request, env);
+      case "POST /api/contact":
+        return handleContactPost(request, env, ctx);
       default:
         if (KNOWN_PATHS.includes(url.pathname)) {
           return json({ error: "method not allowed" }, 405);

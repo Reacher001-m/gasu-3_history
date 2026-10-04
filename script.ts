@@ -411,6 +411,58 @@ async function trackView(key: string, el: HTMLElement | null, label = ''): Promi
     }
 }
 
+// ===== 問い合わせフォーム（/api/contact） =====
+// 結果表示は必ず textContent で行う（innerHTML にするとXSSの温床になる）
+function initContactForm(): void {
+    const form = document.getElementById('contact-form') as HTMLFormElement | null;
+    if (!form) return;
+    const status = document.getElementById('contact-status');
+    const submit = document.getElementById('contact-submit') as HTMLButtonElement | null;
+
+    form.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
+
+        const nameEl = form.elements.namedItem('name') as HTMLInputElement;
+        const emailEl = form.elements.namedItem('email') as HTMLInputElement;
+        const messageEl = form.elements.namedItem('message') as HTMLTextAreaElement;
+        const websiteEl = form.elements.namedItem('website') as HTMLInputElement;
+
+        const data = {
+            name: nameEl.value,
+            email: emailEl.value,
+            message: messageEl.value,
+            website: websiteEl.value // ハニーポット（人間は空のまま）
+        };
+
+        // フロント側チェックはUXのため。最終判定はサーバーが再検証する
+        if (!data.name.trim() || !data.email.trim() || !data.message.trim()) {
+            if (status) status.textContent = '未入力の項目があります。';
+            return;
+        }
+
+        if (submit) submit.disabled = true;
+        if (status) status.textContent = '送信中...';
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const body = (await res.json().catch(() => ({}))) as { error?: string };
+            if (res.ok) {
+                form.reset();
+                if (status) status.textContent = '送信しました。ありがとうございます。';
+            } else {
+                if (status) status.textContent = `送信に失敗しました: ${body.error || res.status}`;
+            }
+        } catch {
+            if (status) status.textContent = '送信に失敗しました（サーバーに接続できません）。';
+        } finally {
+            if (submit) submit.disabled = false;
+        }
+    });
+}
+
 class ArticlesPage {
     private root: HTMLElement | null;
     private empty: HTMLElement | null;
@@ -591,6 +643,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (profileViewsEl) {
         void trackView('view:index', profileViewsEl);
     }
+
+    // Contact form (profile page)
+    initContactForm();
 
     // 7) BGM consent + play (user gesture)
     const consentEl = document.getElementById('bgm-consent');

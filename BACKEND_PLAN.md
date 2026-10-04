@@ -145,13 +145,41 @@ wrangler.jsonc  … main + run_worker_first + env.staging(KV binding)
 
 ### 段階2: 問い合わせフォーム（HTTP入力の本丸）
 
-- [ ] フロントにフォーム追加（送信中は disabled、結果は `textContent` で表示）
-- [ ] バリデーション: 必須・文字数・メール形式・不正JSON（400）
-- [ ] ハニーポット（bot対策）と簡易レート制限（IP単位 → 429）
-- KVへの保存 + 送信履歴の閲覧（まずは `wrangler kv` コマンドで十分。管理画面は次段階）
-- [ ] Resend通知（best effort）: 非同期で失敗しても201は返す、エラーは `wrangler tail` にログ
-- [ ] `npx wrangler secret put RESEND_API_KEY` / `TO_EMAIL` でシークレット登録（コミットしない）
-- [ ] 入力を再掲する場合のXSS対策（HTMLエスケープ / `textContent`）
+- [x] フロントにフォーム追加（送信中は disabled、結果は `textContent` で表示）
+      → index.html に Contact セクション（お名前 / メール / 本文 / 送信ボタン / `aria-live` ステータス）
+      → `script.js` / `script.ts` に `initContactForm()`（XSS対策は textContent のみ）
+- [x] バリデーション: 必須・文字数・メール形式・不正JSON（400）
+      → `backend/validate.js`（サーバーが最後の砦。フロント検証はUX用で再検証あり）
+- [x] ハニーポット（bot対策）と簡易レート制限（IP単位 → 429）
+      → ハニーポットは「成功を装って破棄」（botに学習させない）
+      → レート制限: 1分バケット5件、TTL 120s、失敗時は fail-open
+      → ローカル7項目テスト（405/400×3/201/honeypot 201/201×5/429）全パス
+- [x] KVへの保存 + 送信履歴の閲覧
+      → キー `contact:<ISO8601>:<rand8>`、値はレコードJSON
+      → 閲覧: `npx wrangler kv key list --binding APP_KV --env staging --remote`
+        （**`--remote` 付けないとローカル状態を見るので空になる**）
+      → リモート検証: ポスト → 201 → list に `contact:` と `rl:` を確認済み
+- [ ] Resend通知（best effort）: 未設定時は `console.log` でスキップし201は返す（実装済み）
+      → **要準備: Resendアカウント + verified sender + `wrangler secret put`**（下記）
+- [ ] ブラウザでの送信確認（staging の Contact フォーム → KVに残ること）
+
+#### Resend の有効化手順（準備ができたら実行）
+
+```powershell
+# 1. https://resend.com で登録 → メール認証 → API Keys 作成 → Sender登録（自分のアドレス）
+# 2. シークレット登録（値はチャットではなくこのプロンプトに貼り付ける）
+npx wrangler secret put RESEND_API_KEY --env staging
+npx wrangler secret put TO_EMAIL --env staging          # 受信先=自分のアドレス
+# 3. 任意: FROM_EMAIL（送信元。未設定なら TO_EMAIL を使う）
+npx wrangler secret put FROM_EMAIL --env staging
+# 4. 確認: フォーム送信 → メールが届き、npm run tail:staging にログが出る
+```
+
+#### 検証コマンドの注意（Windows PowerShell）
+
+- JSONを `-d '{\"name\":...}'` で直接渡すと**引用符の渡し方で壊れることがある**
+  （症状: 意図せず `invalid JSON body` 400）
+  → 確実な方法: JSONをファイルに書いて `curl.exe -X POST ... --data-binary "@$tmp"`
 
 ### 段階3: 運用
 

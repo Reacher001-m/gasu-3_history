@@ -383,6 +383,53 @@ async function trackView(key, el, label = '') {
     }
 }
 
+// ===== 問い合わせフォーム（/api/contact） =====
+// 結果表示は必ず textContent で行う（innerHTML にするとXSSの温床になる）
+function initContactForm() {
+    const form = document.getElementById('contact-form');
+    if (!form) return;
+    const status = document.getElementById('contact-status');
+    const submit = document.getElementById('contact-submit');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = {
+            name: form.elements.name.value,
+            email: form.elements.email.value,
+            message: form.elements.message.value,
+            website: form.elements.website.value // ハニーポット（人間は空のまま）
+        };
+
+        // フロント側チェックはUXのため。最終判定はサーバーが再検証する
+        if (!data.name.trim() || !data.email.trim() || !data.message.trim()) {
+            status.textContent = '未入力の項目があります。';
+            return;
+        }
+
+        submit.disabled = true;
+        status.textContent = '送信中...';
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const body = await res.json().catch(() => ({}));
+            if (res.ok) {
+                form.reset();
+                status.textContent = '送信しました。ありがとうございます。';
+            } else {
+                status.textContent = `送信に失敗しました: ${body.error || res.status}`;
+            }
+        } catch (err) {
+            status.textContent = '送信に失敗しました（サーバーに接続できません）。';
+        } finally {
+            submit.disabled = false;
+        }
+    });
+}
+
 class ArticlesPage {
     constructor({ rootId, emptyId, jsonPath, cardClassName }) {
         this.root = document.getElementById(rootId);
@@ -569,6 +616,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (profileViewsEl) {
         trackView('view:index', profileViewsEl);
     }
+
+    // 7-2) Contact form (profile page)
+    initContactForm();
 
     // 8) BGM consent + play (user gesture)
     const consentEl = document.getElementById('bgm-consent');
