@@ -183,9 +183,18 @@ npx wrangler secret put FROM_EMAIL --env staging
 
 ### 段階3: 運用
 
-- [ ] README / PROJECT_SPEC にAPI仕様を追記
-- [ ] デプロイ手順の整備（git push → `npx wrangler deploy`）
-- [ ] （次段階の伏線）管理画面認証・D1移行・コメント機能・Cron Triggers
+- [x] README に「バックエンド API」節を追加（ルート表・npm scripts・送信履歴コマンド）
+      → 従来の「pushすると自動デプロイ」記述を修正（**CIは無くプッシュ≠デプロイ**）
+- [x] PROJECT_SPEC に **§9 バックエンド API**（ルート一覧・検証規則・環境）を追加、§8.3 を staging/production 両対応に書き直し
+- [ ] Resend: `TO_EMAIL` が未登録（`RESEND_API_KEY` のみ確認済み）
+      → `npx wrangler secret put TO_EMAIL --env staging` 後、フォーム送信でメール着 & `tail` に `resend sent:` を確認
+- [ ] **本番公開手順（完成後の最終操作として実行）**
+  1. 本番用KV作成: `npx wrangler kv namespace create prod_kv` → 出たIDを `wrangler.jsonc` のルート側に binding 追記
+     （**本番はまだ binding が無い**。そのままだとカウンター/フォームが500になる）
+  2. 本番シークレット: `npx wrangler secret put RESEND_API_KEY` / `TO_EMAIL`（`--env` なし＝本番）
+  3. `npm run deploy` → 本番URLで health / count / contact を確認
+  4. staging は学習用として残す（削除したい場合: `npx wrangler delete gasu-3-history-staging`）
+- [ ] （次段階の伏線・任意）管理画面認証・D1移行・コメント機能・Cron Triggers
 
 ## 6. セキュリティ原則（実装時に必ず確認）
 

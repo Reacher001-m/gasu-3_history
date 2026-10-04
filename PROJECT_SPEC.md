@@ -320,13 +320,54 @@ works / vlog / 記事ページのカード・リンクは Profile の `timeline-
 - 描画や挙動を変える場合は `script.ts` と `script.js` の両方に反映する（HTMLは `script.js` を参照）
 - カードの見た目を変える場合は `style.css` の `.article-card.*` を参照（`content/` は無関係）
 
-### 8.3 デプロイ（Cloudflare Workers Static Assets）
+### 8.3 デプロイ（Cloudflare Workers + Static Assets）
 
-- `wrangler.jsonc`（コミット済み）で静的サイトとしてデプロイする
-  - `assets.directory: "."`（リポジトリルートがそのままアセット）
-  - Worker名 `gasu-3-history`、`compatibility_date` はデプロイ時に更新してよい
-- デプロイコマンド：`npx wrangler deploy`（設定ファイルがあるためセットアップ質問は出ない）
-- `.assetsignore` がアップロード除外を制御（gitignore記法）
-  - 除外：`node_modules` / `content` / `*.md` / `wrangler.jsonc` / `package.json` / `script.ts` 等
-  - **必要ファイル（`*.html` / `style.css` / `script.js` / `*.json` / `articles/` / `images/` / `bgm.mp3` / `kopa.jpg`）は絶対に除外しない**
-- 動作確認はローカルで可能：`npx wrangler deploy --dry-run`（アップロードせずアセット検査のみ。25MiB超のファイルがあるとエラーになる）
+- `wrangler.jsonc`（コミット済み）でデプロイする
+  - `main: backend/index.js`（Worker）＋ `assets.directory: "."`（ルートがアセット）
+  - `assets.run_worker_first: ["/api/*"]` → **APIだけWorker**、他は静的配信
+  - 本番名 `gasu-3-history` / staging名 `gasu-3-history-staging`（`env.staging`、KV binding `APP_KV` はstagingのみ）
+- コマンド（npm scripts 経由を推奨）
+  - `npm run dev` … ローカル開発（`--persist-to` で `.wrangler/state` 監視ループを回避。**このフラグ必須**）
+  - `npm run deploy:staging` … 開発中の検証用
+  - `npm run deploy` … 本番（**完成後の最終操作**。途中では実行しない）
+- `.assetsignore` がアセット除外を制御（gitignore記法、`backend` も除外対象）
+  - **必要ファイル（`*.html` / `style.css` / `script.js` / `*.json` / `articles/` / `images/` / `bgm.mp3`）は絶対に除外しない**
+- 検査: `npx wrangler deploy --dry-run`
+- **プッシュ ≠ デプロイ**（自動デプロイCIは無い）
+
+## 9. バックエンド API（Cloudflare Worker）
+
+開発計画・学習記録は [BACKEND_PLAN.md](BACKEND_PLAN.md)。実装は `backend/` 配下。
+
+### 9.1 ルート一覧
+
+| メソッド | パス | 応答 |
+|---|---|---|
+| GET | `/api/health` | `200 {"ok":true}` |
+| GET | `/api/count?key=view:<slug>` | `200 {"key","count"}`（増やさない・表示専用） |
+| POST | `/api/count` `{"key"}` | `201 {"key","count"}`（+1した値） |
+| POST | `/api/contact` `{"name","email","message","website?"}` | `201 {"ok":true}` / `400` / `429` |
+| （上記以外のメソッド） | 既知パス | `405 {"error":"method not allowed"}` |
+| （`/api` 外） | - | Workerには届かない（静的配信） |
+
+- レスポンスは全館 `application/json` + `cache-control: no-store`、エラーは `{"error":"..."}`
+- キー検証: `view:` + `[a-z0-9-]{1,64}` のみ許可（`backend/counter.js`）
+- バリデーション（`backend/validate.js`）: name ≤50 / email 形式 ≤100 / message ≤2000、不正JSONは400
+- ハニーポット（`website` フィールド）: 値があれば**成功を装って破棄**（保存も通知もしない）
+- レート制限: IP単位・1分5件（KVの1分バケット、TTL120s、fail-open）
+- 保存キー: `contact:<ISO8601>:<乱数8>` / レート: `rl:<ip>:<分バケット>`
+
+### 9.2 フロント側の接続（script.js）
+
+- カードの `閲覧 N`: 読み込みは `GET`（表示のみ）→ **「続きはこちら→」クリック時のみ `POST`**（`keepalive: true`）
+- プロフィールの `Views:`: ページ訪問時に `POST`（`trackView`）
+- Contact フォーム: 送信中は disabled、結果は **`textContent` のみ**（XSS禁止）
+- `file://` でAPIに届かない環境では黙って失敗し、表示は変更しない
+
+### 9.3 環境・シークレット
+
+- staging のみ KV binding `APP_KV`（本番へは段階3で本番KVを作成してから）
+- シークレット（値をコード/チャットに書かない）:
+  `RESEND_API_KEY` / `TO_EMAIL` / `FROM_EMAIL`（任意、未設定時は TO を送信元に流用）
+- 未設定でも `POST /api/contact` は 201（メールはスキップし `wrangler tail` にログ）
+- 送信履歴確認: `npx wrangler kv key list --binding APP_KV --env staging --remote`

@@ -81,6 +81,13 @@ async function isRateLimited(env, ip) {
 }
 
 async function sendEmail(env, record) {
+  // 秘密情報はプロンプト入力なので前後の空白·改行が紛れ込むことがある → 念のためtrim
+  const to = (env.TO_EMAIL || "").trim();
+  const from = (env.FROM_EMAIL || env.TO_EMAIL || "").trim();
+  if (!to) {
+    console.error("resend skipped: TO_EMAIL is empty");
+    return;
+  }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -90,8 +97,8 @@ async function sendEmail(env, record) {
       },
       body: JSON.stringify({
         // from: Resendでverifiedにした送信元。未設定なら宛先と同じアドレスを流用
-        from: env.FROM_EMAIL || env.TO_EMAIL,
-        to: [env.TO_EMAIL],
+        from,
+        to: [to],
         reply_to: record.email,
         subject: `ポートフォリオ問い合わせ: ${record.name}`,
         text: `名前: ${record.name}\nメール: ${record.email}\n\n${record.message}`,
@@ -99,6 +106,10 @@ async function sendEmail(env, record) {
     });
     if (!res.ok) {
       console.error("resend error:", res.status, await res.text());
+    } else {
+      // 成功ログも出す（tail で「メールが届いた/届かなかった」を判定できる）
+      const sent = await res.json().catch(() => ({}));
+      console.log("resend sent:", sent.id || "(no id)");
     }
   } catch (e) {
     console.error("resend request failed:", e);
