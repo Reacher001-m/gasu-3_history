@@ -167,8 +167,12 @@ function toPlainText(src) {
 
 // ==================== Article page template ====================
 
-function renderArticlePage({ page, title, date, bodyHtml, backHref, backLabel }) {
-    const dateHtml = date ? `\n                <p class="article-date">${escapeHtml(date)}</p>` : '';
+function renderArticlePage({ page, title, date, image, bodyHtml, backHref, backLabel }) {
+    const dateHtml = date ? `\n                    <p class="article-date">${escapeHtml(date)}</p>` : '';
+    // front matter の image をタイトル右側に表示（カード側の画像を移動）
+    const imageHtml = image
+        ? `\n                <img class="article-detail-image" src="../${escapeHtml(image)}" alt="${escapeHtml(title)}">`
+        : '';
     return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -234,7 +238,11 @@ function renderArticlePage({ page, title, date, bodyHtml, backHref, backLabel })
         <main class="content">
             <section class="section article-detail">
                 <a class="article-back" href="../${backHref}">← ${backLabel} 一覧へ戻る</a>
-                <h2 class="section-title">${escapeHtml(title)}</h2>${dateHtml}
+                <div class="article-head">
+                    <div class="article-head-text">
+                        <h2 class="section-title">${escapeHtml(title)}</h2>${dateHtml}
+                    </div>${imageHtml}
+                </div>
                 <div class="article-body">
 ${bodyHtml}
                 </div>
@@ -354,6 +362,7 @@ function build() {
                 page: src.type,
                 title: e.meta.title || 'Untitled',
                 date: e.meta.date || '',
+                image: src.type === 'works' ? (e.meta.image || '') : '',
                 bodyHtml,
                 backHref: src.listPage,
                 backLabel: src.listLabel,

@@ -514,8 +514,8 @@ class ArticlesPage {
             const card = document.createElement('article');
             card.className = `article-card ${this.cardClassName}`.trim();
 
-            // Image (if present)
-            if (item.image) {
+            // Image (if present) — worksカードの画像は記事詳細ページ右側へ移動済み
+            if (item.image && this.cardClassName !== 'works-card') {
                 const imgWrap = document.createElement('div');
                 imgWrap.className = 'article-image-wrap';
 

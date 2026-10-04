@@ -40,7 +40,7 @@ npm run tail:staging     # staging のリクエストログをリアルタイム
 ---
 title: タイトル（必須）
 date: 2026.01.15
-image: images/works/xxx.png
+image: images/works/xxx.png  ← works は記事詳細ページ右側に表示（一覧カードには出ない）
 url: https://...        ← 任意（書くと「続きはこちら」が外部リンクになる）
 summary: ホバーに出す短い説明（任意・省略時は本文が使われる）
 ---
@@ -58,7 +58,7 @@ npm run build   # content/*.md → works.json / vlog.json / articles/*.html を�
 npm run check   # md と生成物の整合を検査（不一致なら exit 1）
 ```
 
-- 画像は `images/works/` または `images/vlog/` に配置
+- 画像は `images/works/` または `images/vlog/` に配置（works は詳細ページのタイトル右側、vlog はカード左側に表示）
 - 生成された `articles/*.html` が記事詳細ページ（サイトと同じ見た目）
 - 一覧カードの「続きはこちら→」から遷移（`url` を書いた場合はそちらが優先）
 - 対応記法：見出し / 太字 / コード / リスト / 引用 / リンク / 画像 / コードブロック / 水平線

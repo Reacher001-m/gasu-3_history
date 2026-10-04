@@ -569,10 +569,14 @@ body {
     border-left: 2px solid #444444;
 }
 
-/* Works: vlogと同じ色（レイアウトのみ揃える） */
+/* Works: 画像は記事詳細ページ右側へ移動済み → 1カラム構成 */
 .article-card.works-card {
     background: #1a1a1a;
     border: 1px solid #2a2a2a;
+    grid-template-columns: 1fr;
+    min-height: 140px;
+    align-items: start;
+    align-content: start;
 }
 
 /* Achievements-like hover（Profile の .timeline-item と同じ動き） */
@@ -582,12 +586,6 @@ body {
     border-color: #2a2a2a;
     border-left-color: #ffffff;
     box-shadow: none;
-}
-
-.article-card.works-card .article-image-wrap {
-    background: rgba(0, 0, 0, 0.2);
-    border: none;
-    padding: 0;
 }
 
 .article-card.works-card .article-title {
@@ -600,8 +598,7 @@ body {
     border-left-color: #ffffff;
 }
 
-.article-card.vlog-card .article-image-wrap,
-.article-card.works-card .article-image-wrap {
+.article-card.vlog-card .article-image-wrap {
     width: 80px;
     min-height: 120px;
     height: auto;
@@ -613,11 +610,7 @@ body {
 .article-card.vlog-card .article-title,
 .article-card.vlog-card .article-date,
 .article-card.vlog-card .article-hover-content,
-.article-card.vlog-card .article-content,
-.article-card.works-card .article-title,
-.article-card.works-card .article-date,
-.article-card.works-card .article-hover-content,
-.article-card.works-card .article-content {
+.article-card.vlog-card .article-content {
     grid-column: 2;
 }
 
@@ -629,8 +622,7 @@ body {
         min-height: 0;
     }
 
-    .article-card.vlog-card .article-image-wrap,
-    .article-card.works-card .article-image-wrap {
+    .article-card.vlog-card .article-image-wrap {
         width: 100%;
         height: auto;
         aspect-ratio: 1 / 1;
@@ -640,11 +632,7 @@ body {
     .article-card.vlog-card .article-title,
     .article-card.vlog-card .article-date,
     .article-card.vlog-card .article-hover-content,
-    .article-card.vlog-card .article-content,
-    .article-card.works-card .article-title,
-    .article-card.works-card .article-date,
-    .article-card.works-card .article-hover-content,
-    .article-card.works-card .article-content {
+    .article-card.vlog-card .article-content {
         grid-column: auto;
     }
 }
@@ -722,8 +710,7 @@ body {
     margin-bottom: 10px;
 }
 
-.article-card.vlog-card .article-views,
-.article-card.works-card .article-views {
+.article-card.vlog-card .article-views {
     grid-column: 2;
 }
 
@@ -1132,6 +1119,43 @@ body {
 .article-detail .article-date {
     margin-top: -20px;
     margin-bottom: 24px;
+}
+
+/* タイトル（左）＋ アイコン画像（右）のヘッダー行 */
+.article-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.article-head-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.article-detail-image {
+    flex-shrink: 0;
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    padding: 8px;
+}
+
+@media (max-width: 600px) {
+    .article-head {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .article-detail-image {
+        width: 110px;
+        height: 110px;
+        order: -1;
+    }
 }
 
 .article-body {
