@@ -2,7 +2,7 @@
   {
     "title": "gitの基本的な操作の確認ankiカード",
     "image": "images/works/anki.png",
-    "content": "gitの基本的な操作の確認ができるankiカードです。\n\n【使用方法】\n① 下記URLからファイルをダウンロード\n② ankiを開き、左上のファイル（F）からインポートを選択\n③ ダウンロードしたファイルを選択して完了\n\nファイルURL",
+    "content": "gitの基本的な操作の確認ができるankiカードです。",
     "link": "articles/works-001-git-anki.html"
   },
   {
@@ -14,7 +14,7 @@
   {
     "title": "git/githubを手で動かしながら学ぼう",
     "image": "images/works/git-Icon.png",
-    "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。もし不具合があったらgithubに上がっているので何なら修正してみてください。\n\nサイト",
+    "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。",
     "link": "articles/works-003-git-site.html"
   }
 ]

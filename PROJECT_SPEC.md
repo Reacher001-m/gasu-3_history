@@ -207,7 +207,7 @@ front matter の注意：
 
 - 1エントリ = 1ページ。テンプレートは `build-content.mjs` 内の `renderArticlePage()` が生成
 - ヘッダー / タブ / BGMコントロール / フッターは `works.html` と同じ流用（`../` 相対パス）
-- 本文は `.article-body`（`style.css` 末尾）で既存配色（背景 `#1a1a1a` 系・文字 `#e0e0e0`・リンク `#78dcff`）を踏襲
+- 本文は `.article-body`（`style.css` 末尾）で既存配色（背景 `#1a1a1a` 系・文字 `#e0e0e0`、リンクは Profile準拠の `#888888` → ホバーで `#ffffff`）を踏襲
 - 「← Works/Vlog 一覧へ戻る」リンク（`.article-back`）付き
 - `body[data-page]` は一覧側と同じ値にするため、タブの active 表示が一覧と連動する
 
@@ -264,6 +264,16 @@ front matter の注意：
 
 - UIのレイアウトは `works` と `vlog` で同じカードフォーマット（画像左 + 1カラム縦積み）になっています。
 - 作品カードの背景/縁（ベース配色）も `vlog` と同じ配色になっています。
+
+### 6.6 ホバー挙動・配色は Profile（index.html）準拠
+
+works / vlog / 記事ページのカード・リンクは Profile の `timeline-item` / `achievement-link` に合わせて統一している（変更時はここを基準に戻す）。
+
+- カード：`transition: all 0.3s ease`、ホバーで `transform: translateX(4px)` + `border-left-color: #ffffff`（影・青グローなし）＝ `.timeline-item:hover` と同じ
+- 説明文の開閉（`.article-hover-content`）：`transition: all 0.3s ease`（opacity + max-height + margin）＝ `.achievement-detail` と同じ。上方向へのスライドや cubic-bezier は使わない
+- リンク色：`#888888` → ホバーで `#ffffff`、下線なし、`transition: color 0.3s ease`（`inline-link` / `article-link` / `article-back` / `.article-body a` すべて共通）
+- 青 `#78dcff` は**リンクには使わない**（残っているのは BGM コントロールのアクセントのみ、全ページ共通）
+- 画像のズーム（`scale(1.05)`）は Profile に存在しないため廃止
 
 
 ---

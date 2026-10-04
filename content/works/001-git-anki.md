@@ -1,6 +1,7 @@
 ---
 title: gitの基本的な操作の確認ankiカード
 image: images/works/anki.png
+summary: gitの基本的な操作の確認ができるankiカードです。
 ---
 gitの基本的な操作の確認ができるankiカードです。
 
