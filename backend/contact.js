@@ -105,7 +105,14 @@ async function sendEmail(env, record) {
       }),
     });
     if (!res.ok) {
-      console.error("resend error:", res.status, await res.text());
+      // from/to の実値をログに出す（メールアドレスはクレデンシャルではないのでログ可）
+      console.error(
+        "resend error:",
+        res.status,
+        `from=[${from}]`,
+        `to=[${to}]`,
+        await res.text()
+      );
     } else {
       // 成功ログも出す（tail で「メールが届いた/届かなかった」を判定できる）
       const sent = await res.json().catch(() => ({}));
