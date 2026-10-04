@@ -359,7 +359,56 @@ interface ArticleItem {
     url?: string;
     image?: string;
     link?: string;
+    id?: string;
     [key: string]: unknown;
+}
+
+// ===== 閲覧数カウンター（バックエンド /api/count） =====
+// - 表示: GET（現在値を読むだけ・増やさない）
+// - カードの増加: 「続きはこちら→」クリック時のみ POST（クリック数 = 閲覧数）
+// - プロフィールの増加: ページ訪問時に POST（trackView）
+
+async function fetchCount(key: string): Promise<number | null> {
+    try {
+        const res = await fetch(`/api/count?key=${encodeURIComponent(key)}`);
+        if (!res.ok) return null;
+        const data = (await res.json()) as { count?: unknown };
+        return typeof data.count === 'number' ? data.count : null;
+    } catch (e) {
+        console.debug('fetchCount skipped:', (e as Error).message);
+        return null;
+    }
+}
+
+async function incrementCount(key: string): Promise<void> {
+    try {
+        await fetch('/api/count', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ key }),
+            keepalive: true // ページ遷移・タブを閉じる直後でも送信を完走させる
+        });
+    } catch (e) {
+        console.debug('incrementCount skipped:', (e as Error).message);
+    }
+}
+
+// ページ訪問数としてカウントし、増加後の値を表示する（プロフィールのViews用）
+async function trackView(key: string, el: HTMLElement | null, label = ''): Promise<void> {
+    try {
+        const res = await fetch('/api/count', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ key })
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as { count?: unknown };
+        if (el && typeof data.count === 'number') {
+            el.textContent = `${label}${data.count}`;
+        }
+    } catch (e) {
+        console.debug('trackView skipped:', (e as Error).message);
+    }
 }
 
 class ArticlesPage {
@@ -452,12 +501,26 @@ class ArticlesPage {
                     a.rel = 'noopener noreferrer';
                 }
                 a.textContent = '続きはこちら→';
+                // クリックでカウント +1（遷移の有無にかかわらず押した数だけ数える）
+                if (item.id) {
+                    a.addEventListener('click', () => void incrementCount(`view:${item.id}`));
+                }
 
                 contentEl.appendChild(a);
             }
 
             card.appendChild(titleEl);
             if (item.date) card.appendChild(dateEl);
+
+            // 閲覧数（読み込み時は表示だけ。増やすのは「続きはこちら→」クリック時）
+            if (item.id && (this.cardClassName === 'works-card' || this.cardClassName === 'vlog-card')) {
+                const viewsEl = document.createElement('div');
+                viewsEl.className = 'article-views';
+                card.appendChild(viewsEl);
+                void fetchCount(`view:${item.id}`).then(n => {
+                    if (n !== null) viewsEl.textContent = `閲覧 ${n}`;
+                });
+            }
             if (item.content) card.appendChild(contentEl);
 
 
@@ -521,6 +584,12 @@ document.addEventListener('DOMContentLoaded', () => {
             cardClassName: 'vlog-card'
         });
         vlog.init();
+    }
+
+    // View counter (profile page)
+    const profileViewsEl = document.getElementById('profile-views');
+    if (profileViewsEl) {
+        void trackView('view:index', profileViewsEl);
     }
 
     // 7) BGM consent + play (user gesture)

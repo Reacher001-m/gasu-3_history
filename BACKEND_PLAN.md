@@ -11,7 +11,7 @@
 |---|---|
 | デプロイ方針 | **`wrangler dev` + staging専用Workers**（本番は触らない。staging 用に別Workers名で検証し、完成後に本番へ） |
 | 学習スタイル | **AI実装＋解説形式**（実装→コード内解説→チェックリストで概念確認） |
-| カウント方式 | **訪問毎に+1**（1リクエスト=+1、セッション排除なし。実装は最小に保つ） |
+| カウント方式 | **カードは「続きはこちら→」クリック数**（GET表示のみ・POSTはクリック時のみ、`keepalive: true`）／**プロフィールのViewsはページ訪問数**（load時にPOST） |
 | フォーム | **KV保存 + Resend（メール通知）**。保存を第一とし、メール送信はベストエフォート（失敗してもKV保存は残し `wrangler tail` にログ） |
 
 ### staging の作り方（wrangler.jsonc の env 分離）
@@ -88,18 +88,19 @@ GET  /api/health                      → 200 {"ok":true}（動作確認用）
 - KVキー設計: `view:index` / `view:works-001` / `contact:<timestamp>` など接頭辞で名前空間分離
 - CORSは**同一オリジンなので不要**。「なぜ不要か」を説明できるようにしておく
 - フロント側の表示先:
-  - index の閲覧数
-  - works/vlog カードごとのビュー数（`script.js` の `ArticlesPage` 経由で接続）
+  - index の `Views:` 行 → ページ訪問数（load時にPOSTで+1）
+  - works/vlog カードの `閲覧 N` → **「続きはこちら→」のクリック数**（読み込みはGET表示のみ）
 
 ## 4. 想定ファイル構成
 
 ```
 backend/
-  index.js      … エントリ（/api/* のルーティング。最初は1ファイルでOK）
-  counter.js    … 段階1（カウンター）で分離
+  index.js      … エントリ（/api/* のルーティングだけ最初は1ファイルでOK）
+  http.js       … json() レスポンスヘルパー（共通）
+  counter.js    … 段階1（カウンター）
   contact.js    … 段階2（フォーム）で分離
   validate.js   … バリデーション（フォーム時に追加）
-wrangler.jsonc  … main + run_worker_first + KV binding
+wrangler.jsonc  … main + run_worker_first + env.staging(KV binding)
 .assetsignore   … backend を追加
 ```
 
@@ -107,19 +108,40 @@ wrangler.jsonc  … main + run_worker_first + KV binding
 
 ### 段階0: Worker化の布石
 
-- [ ] `main` 追加 → `wrangler dev` で「静的サイト + /api/health」が両方動くことを確認
-- [ ] `/api` 以外にWorkerが食い込むと静的サイトが壊れることを確認（`run_worker_first` の意味を体感）
-- [ ] `.assetsignore` に `backend` 追記
-- [ ] Cloudflareダッシュボードで staging用 KV namespace を作成し、`env.staging` に binding 追加
-- [ ] `npx wrangler dev --env staging` で起動確認
+- [x] `main` 追加 → `wrangler dev` で「静的サイト + /api/health」が両方動くことを確認
+- [x] `/api` 以外にWorkerが食い込むと静的サイトが壊れることを確認（`run_worker_first` の意味を体感）
+      → `/` と `/works.html` は静的200、`/api/nope` は404、`POST /api/health` は405
+- [x] `.assetsignore` に `backend` 追記
+- [ ] Cloudflareで staging用 KV namespace を作成し、`env.staging` に binding 追加
+- [x] `npm run dev`（= `wrangler dev --env staging`）で起動確認
+
+#### 段階0で判明した落とし穴（対処済み・再発時にここを読む）
+
+1. **無限リロードループ**
+   - 症状: サーバーはListenするがHTTP応答が返らず、`wrangler dev` のログが「Reloading local server...」で止まらない
+   - 原因: `assets.directory: "."` でプロジェクト全体を監視 → **`.wrangler/state` 内のSQLite(`.sqlite-shm`)書き込みが変更検知 → リロード → さらに書き込み**、が無限ループ
+   - 対処: `--persist-to "%TEMP%\gasu3-state"` でlocal state をプロジェクト外に置く（`npm run dev` に組み込み済み）
+2. **wranglerのバージョンずれ**
+   - 症状: `This Worker requires compatibility date "2026-10-01", but the newest date supported...` エラー
+   - 原因: `npx wrangler` が古いローカルキャッシュ（4.90）を実行
+   - 対処: `devDependencies` に `wrangler@^4.147.0` を固定し、必ず `npm run dev` から起動
+3. **npm scripts**（すべて `--env staging` 前提）
+   - `npm run dev` / `deploy:staging` / `deploy` / `tail:staging`
 
 ### 段階1: カウンター（KV入門）
 
-- [ ] GET/POST /api/count を実装（405・400・500 のエラーハンドリング込み）
-- [ ] index に閲覧数を表示
-- [ ] 別タブで2つ開いて**書き込み競合を観察**（KVは非同時整合 → 「最終一致」を体感）
-- [ ] `wrangler tail` でリクエストログを見る
-- [ ] `wrangler dev` で十分に検証してから本番へ
+- [x] GET/POST /api/count を実装（405・400・500 のエラーハンドリング込み）
+      → ローカルで9項目テスト済み（201増加 / GET / 400×3 / 405 / 静的200）
+- [x] index に閲覧数を表示（`Views:` 行）＋ works/vlog カードに `閲覧 N` 表示
+      → `id` を build-content.mjs の出力に追加（`works-001-git-anki` 等）
+      → `script.js` / `script.ts` に `fetchCount` / `incrementCount` / `trackView` を追加
+      → **カードはGET表示のみ・クリック時POST**、プロフィールは訪問時POST（file:// では黙って失敗）
+- [x] ブラウザで確認: `npm run dev` → http://127.0.0.1:8787 で閲覧数が増えること
+- [ ] 別タブで2つ開いて**書き込み競合を観察**（KVは非同時整合 → 「最終一致」を体感）← 学習用・任意
+- [x] staging へデプロイ + `npm run tail:staging` でログ確認
+      → https://gasu-3-history-staging.yuusi.workers.dev （8項目のリモート検証済み、tailで201観察済み）
+- [x] KV namespace のプレースホルダIDを実IDへ差し替え（`5044ad2c6d1141cf99f3b9cfc1255f1c`）
+- [ ] クリック数方式の最終ブラウザ確認（stagingで「続きはこちら→」→ リロードして `閲覧 +1`）
 
 ### 段階2: 問い合わせフォーム（HTTP入力の本丸）
 

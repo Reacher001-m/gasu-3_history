@@ -4,6 +4,7 @@ node_modules
 .claude
 .opencode
 .wrangler
+backend
 content
 build-content.mjs
 package.json

@@ -715,6 +715,19 @@ body {
     margin-bottom: 12px;
 }
 
+.article-views {
+    color: #666666;
+    font-size: 0.75rem;
+    margin-top: -6px;
+    margin-bottom: 10px;
+}
+
+.article-card.vlog-card .article-views,
+.article-card.works-card .article-views {
+    grid-column: 2;
+}
+
+
 .article-content {
     color: #888888;
     font-size: 0.95rem;

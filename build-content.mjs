@@ -332,6 +332,8 @@ function build() {
         const items = [];
         for (const e of entries) {
             const item = {};
+            // カウンターAPI（/api/count）用の安定したID（例: works-001-git-anki）
+            item.id = e.pageFile.replace(/\.html$/i, '');
             if (e.meta.title) item.title = e.meta.title;
             if (e.meta.date) item.date = e.meta.date;
             if (e.meta.image) item.image = e.meta.image;

@@ -1,17 +1,20 @@
 [
   {
+    "id": "works-001-git-anki",
     "title": "gitの基本的な操作の確認ankiカード",
     "image": "images/works/anki.png",
     "content": "gitの基本的な操作の確認ができるankiカードです。",
     "link": "articles/works-001-git-anki.html"
   },
   {
+    "id": "works-002-titokutai",
     "title": "知徳体CADデータ",
     "image": "images/works/titokutai.jpg",
     "content": "私の母校の教育方針で掲げている言葉。意味は知らないネタ枠。\n\nデータダウンロード",
     "link": "articles/works-002-titokutai.html"
   },
   {
+    "id": "works-003-git-site",
     "title": "git/githubを手で動かしながら学ぼう",
     "image": "images/works/git-Icon.png",
     "content": "gitコマンドを自由に打ったり、実現場の開発フローの順でgitを操作したり、gitやgithubの操作テストなどを手で動かしながら学べるサイトです。",

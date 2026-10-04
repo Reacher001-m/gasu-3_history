@@ -4,6 +4,13 @@
   "description": "静的ポートフォリオサイト（content/*.md から works.json / vlog.json を生成）",
   "scripts": {
     "build": "node build-content.mjs",
-    "check": "node build-content.mjs --check"
+    "check": "node build-content.mjs --check",
+    "dev": "wrangler dev --env staging --persist-to \"%TEMP%\\gasu3-state\"",
+    "deploy:staging": "wrangler deploy --env staging",
+    "deploy": "wrangler deploy",
+    "tail:staging": "wrangler tail --env staging"
+  },
+  "devDependencies": {
+    "wrangler": "^4.147.0"
   }
 }
