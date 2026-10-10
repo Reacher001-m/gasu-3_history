@@ -1,5 +1,13 @@
 [
   {
+    "id": "vlog-20261010-trend",
+    "title": "トレンドまとめ 2026-10-10",
+    "date": "2026.10.10",
+    "image": "images/vlog/daily.png",
+    "content": "Cloudflare×Deno買収がエッジコンピューティング/AI実行環境に大きな影響",
+    "link": "articles/vlog-20261010-trend.html"
+  },
+  {
     "id": "vlog-001-ollama-qwen-code",
     "title": "Ollama + Qwen3-Coder-NextでローカルClaude Code環境を作ろうとしてQwen Codeに苦戦した話",
     "image": "images/vlog/qiita_icon.png",

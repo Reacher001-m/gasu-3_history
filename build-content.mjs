@@ -325,7 +325,13 @@ function build() {
 
         const files = fs.readdirSync(absDir)
             .filter(f => f.toLowerCase().endsWith('.md'))
-            .sort((a, b) => orderNumber(a) - orderNumber(b) || a.localeCompare(b));
+            .sort((a, b) => {
+                const aDaily = /^\d{8}-trend\.md$/.test(a);
+                const bDaily = /^\d{8}-trend\.md$/.test(b);
+                if (aDaily !== bDaily) return aDaily ? -1 : 1;
+                if (aDaily) return b.localeCompare(a);
+                return orderNumber(a) - orderNumber(b) || a.localeCompare(b);
+            });
 
         const entries = [];
         for (const f of files) {
